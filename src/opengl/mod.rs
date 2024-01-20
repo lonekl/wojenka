@@ -1,6 +1,7 @@
 pub mod object_conversion;
 pub mod panels;
 pub mod algorithms;
+pub mod error;
 pub mod triangles;
 pub mod values;
 
@@ -13,9 +14,10 @@ use winit::event_loop::ControlFlow;
 use war_economy_core::Game;
 use crate::{ResultStringify, RuntimeSettings};
 use crate::opengl::algorithms::{Camera, KeyControls};
+use crate::opengl::error::InterfaceError;
 use crate::opengl::object_conversion::map::map_tiles_to_vertexes;
 use crate::opengl::panels::game::GamePanel;
-use crate::opengl::panels::{Panel, PanelError};
+use crate::opengl::panels::Panel;
 use crate::units::{Angle, Matrix4x4, RotationXYZ};
 
 
@@ -48,7 +50,7 @@ impl OpenGlInterface {
                     .unwrap_or(Duration::ZERO)
             );
 
-            let event_pass_result: Result<(), PanelError> = try {
+            let event_pass_result: Result<(), InterfaceError> = try {
 
                 match event {
                     GlutinEvent::WindowEvent { event: window_event, .. } => match window_event {
@@ -61,7 +63,7 @@ impl OpenGlInterface {
                     },
                     GlutinEvent::RedrawRequested(window_id) => {
                         if window_id != display.gl_window().window().id() {
-                            Err(PanelError::WrongWindowId)?;
+                            Err(InterfaceError::WrongWindowId)?;
                         }
 
                         panel.redraw(&display, last_frame_time.elapsed())?;
