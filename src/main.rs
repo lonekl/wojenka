@@ -1,3 +1,4 @@
+#![feature(try_blocks)]
 #[macro_use]
 pub extern crate glium;
 

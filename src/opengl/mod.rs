@@ -15,7 +15,7 @@ use crate::{ResultStringify, RuntimeSettings};
 use crate::opengl::algorithms::{Camera, KeyControls};
 use crate::opengl::object_conversion::map::map_tiles_to_vertexes;
 use crate::opengl::panels::game::GamePanel;
-use crate::opengl::panels::Panel;
+use crate::opengl::panels::{Panel, PanelError};
 use crate::units::{Angle, Matrix4x4, RotationXYZ};
 
 
@@ -41,31 +41,41 @@ impl OpenGlInterface {
         event_loop.run(move |event, _, control_flow| {
             let cycle_start = Instant::now();
             let time_from_last_frame = cycle_start.duration_since(last_frame_time);
-            *control_flow = ControlFlow::WaitUntil(cycle_start + runtime_settings.frame_length.checked_sub(time_from_last_frame).unwrap_or(Duration::ZERO));
+            *control_flow = ControlFlow::WaitUntil(
+                cycle_start
+                    + runtime_settings.frame_length
+                    .checked_sub(time_from_last_frame)
+                    .unwrap_or(Duration::ZERO)
+            );
 
-            match event {
-                GlutinEvent::WindowEvent { event: window_event, .. } => match window_event {
-                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                    WindowEvent::KeyboardInput { input, is_synthetic, .. } => panel.keyboard_event(input, is_synthetic).unwrap(),
+            let event_pass_result: Result<(), PanelError> = try {
+
+                match event {
+                    GlutinEvent::WindowEvent { event: window_event, .. } => match window_event {
+                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::KeyboardInput { input, is_synthetic, .. } => panel.keyboard_event(input, is_synthetic)?,
+                        _ => {},
+                    },
+                    GlutinEvent::RedrawEventsCleared => if time_from_last_frame >= runtime_settings.frame_length {
+                        display.gl_window().window().request_redraw()
+                    },
+                    GlutinEvent::RedrawRequested(window_id) => {
+                        if window_id != display.gl_window().window().id() {
+                            Err(PanelError::WrongWindowId)?;
+                        }
+
+                        panel.redraw(&display, last_frame_time.elapsed())?;
+                        last_frame_time = Instant::now();
+
+                    },
                     _ => {},
-                },
-                GlutinEvent::RedrawEventsCleared => if time_from_last_frame >= runtime_settings.frame_length {
-                    display.gl_window().window().request_redraw()
-                },
-                GlutinEvent::RedrawRequested(window_id) => {
-                    if window_id != display.gl_window().window().id() {
-                        panic!("Window id {window_id:?} doesn't match game window.");
-                    }
+                }
 
-                    panel.redraw(&display, last_frame_time.elapsed()).unwrap();
-                    last_frame_time = Instant::now();
+            };
 
-                },
-                _ => {},
-            }
-
-            if time_from_last_frame >= runtime_settings.frame_length {
-                //display.gl_window().window().request_redraw();
+            match event_pass_result {
+                Ok(_) => {},
+                Err(error) => eprintln!("Error caught: {error}"),
             }
 
         })
