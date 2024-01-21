@@ -1,47 +1,47 @@
 #[derive(Clone, Copy)]
-pub struct Vertex3d {
+pub struct MapVertex {
 
     pub position: [f32; 3],
-    pub uv: [f32; 2],
+    pub surface_uv: [f32; 2],
 
 }
 
-implement_vertex! { Vertex3d, position, uv}
+implement_vertex! { MapVertex, position, surface_uv}
 
-impl Vertex3d {
+impl MapVertex {
 
     pub fn create_square(
         neg_x_neg_y: [f32; 3],
         pos_x_neg_y: [f32; 3],
         neg_x_pos_y: [f32; 3],
         pos_x_pos_y: [f32; 3],
-    ) -> [Vertex3d; 6] {
+    ) -> [MapVertex; 6] {
 
 
         [
-            Vertex3d {
+            MapVertex {
                 position: neg_x_neg_y,
-                uv: [0.0, 0.0],
+                surface_uv: [0.0, 0.0],
             },
-            Vertex3d {
+            MapVertex {
                 position: pos_x_neg_y,
-                uv: [1.0, 0.0],
+                surface_uv: [1.0, 0.0],
             },
-            Vertex3d {
+            MapVertex {
                 position: pos_x_pos_y,
-                uv: [1.0, 1.0],
+                surface_uv: [1.0, 1.0],
             },
-            Vertex3d {
+            MapVertex {
                 position: neg_x_neg_y,
-                uv: [0.0, 0.0],
+                surface_uv: [0.0, 0.0],
             },
-            Vertex3d {
+            MapVertex {
                 position: pos_x_pos_y,
-                uv: [1.0, 1.0],
+                surface_uv: [1.0, 1.0],
             },
-            Vertex3d {
+            MapVertex {
                 position: neg_x_pos_y,
-                uv: [0.0, 1.0],
+                surface_uv: [0.0, 1.0],
             },
         ]
     }

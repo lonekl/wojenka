@@ -5,15 +5,14 @@ use war_economy_core::Game;
 use crate::opengl::algorithms::{Camera, KeyControls};
 use crate::opengl::object_conversion::map::map_tiles_to_vertexes;
 use crate::opengl::panels::{Panel};
-use crate::opengl::triangles::Vertex3d;
-use crate::opengl::{FRAGMENT_SHADER, VERTEX_SHADER};
+use crate::opengl::triangles::MapVertex;
 use crate::opengl::error::{InterfaceError, ToInterfaceError};
 use crate::units::{Angle, Matrix4x4};
 
 pub struct GamePanel {
 
     terrain_program: Program,
-    map_vertex_buffer: VertexBuffer<Vertex3d>,
+    map_vertex_buffer: VertexBuffer<MapVertex>,
 
     keyboard: KeyControls,
     camera: Camera,
@@ -92,3 +91,40 @@ impl Panel for GamePanel {
     }
 
 }
+
+const VERTEX_SHADER: &'static str = r#"
+#version 150
+
+in vec3 position;
+in vec2 surface_uv;
+
+uniform mat4 projection;
+uniform mat3 rotation;
+uniform vec3 camera_position;
+
+out vec2 v_surface_uv;
+
+void main() {
+
+    gl_Position = projection * vec4(rotation * (position - camera_position), 1.0);
+
+    v_surface_uv = surface_uv;
+
+}
+
+"#;
+
+const FRAGMENT_SHADER: &'static str = r#"
+#version 150
+
+in vec2 v_surface_uv;
+
+out vec4 color;
+
+void main() {
+
+    color = vec4(v_surface_uv.x, 1.0, v_surface_uv.y, 1.0);
+
+}
+
+"#;

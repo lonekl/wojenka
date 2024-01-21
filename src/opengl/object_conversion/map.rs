@@ -1,7 +1,7 @@
 use war_economy_core::map::{MapShape, Tile};
-use crate::opengl::triangles::Vertex3d;
+use crate::opengl::triangles::MapVertex;
 
-pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<Vertex3d> {
+pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> {
     let (map_shape, tiles) = terrain;
 
     let mut vertex_groups = vec![];
@@ -75,7 +75,7 @@ fn create_tile_square(
     south_east_height: f32,
     north_west_height: f32,
     north_east_height: f32,
-) -> [Vertex3d; 24] {
+) -> [MapVertex; 24] {
     let west_central_height = (west_height + central_height) / 2.0;
     let east_central_height = (east_height + central_height) / 2.0;
     let south_central_height = (south_height + central_height) / 2.0;
@@ -87,25 +87,25 @@ fn create_tile_square(
     let north_west_central_height = (north_west_height + north_height + west_height + central_height) / 4.0;
 
     let vertex_array_2d = [
-        Vertex3d::create_square(
+        MapVertex::create_square(
             [tile_x,       tile_y, -south_west_central_height],
             [tile_x + 0.5, tile_y,      -south_central_height],
             [tile_x,       tile_y + 0.5, -west_central_height],
             [tile_x + 0.5, tile_y + 0.5,      -central_height],
         ),
-        Vertex3d::create_square(
+        MapVertex::create_square(
             [tile_x + 0.5, tile_y,      -south_central_height],
             [tile_x + 1.0, tile_y, -south_east_central_height],
             [tile_x + 0.5, tile_y + 0.5,      -central_height],
             [tile_x + 1.0, tile_y + 0.5, -east_central_height],
         ),
-        Vertex3d::create_square(
+        MapVertex::create_square(
             [tile_x,       tile_y + 0.5,       -west_central_height],
             [tile_x + 0.5, tile_y + 0.5,            -central_height],
             [tile_x,       tile_y + 1.0, -north_west_central_height],
             [tile_x + 0.5, tile_y + 1.0,      -north_central_height],
         ),
-        Vertex3d::create_square(
+        MapVertex::create_square(
             [tile_x + 0.5, tile_y + 0.5,            -central_height],
             [tile_x + 1.0, tile_y + 0.5,       -east_central_height],
             [tile_x + 0.5, tile_y + 1.0,      -north_central_height],
