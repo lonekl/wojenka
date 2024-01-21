@@ -30,8 +30,7 @@ impl FmtDisplay for InterfaceError {
 
         fn output_error<E: FmtDisplay>(prefix: &str, formatter: &mut Formatter<'_>, error: E) -> std::fmt::Result {
             formatter.write_str(prefix)?;
-            error.fmt(formatter)?;
-            formatter.write_char('.')
+            error.fmt(formatter)
         }
 
         formatter.write_str("PanelError > ")?;

@@ -6,19 +6,15 @@ pub mod triangles;
 pub mod values;
 
 use std::time::{Duration, Instant};
-use glium::{glutin, Display, Surface, VertexBuffer, Program, DrawParameters, Depth, DepthTest};
+use glium::{glutin, Display};
 use glutin::{event_loop as glutin_event_loop, event as glutin_event};
-use glutin_event_loop::EventLoop as GlutinEventLoop;
 use glutin_event::{Event as GlutinEvent, WindowEvent};
 use winit::event_loop::ControlFlow;
-use war_economy_core::Game;
 use crate::{ResultStringify, RuntimeSettings};
-use crate::opengl::algorithms::{Camera, KeyControls};
 use crate::opengl::error::InterfaceError;
-use crate::opengl::object_conversion::map::map_tiles_to_vertexes;
 use crate::opengl::panels::game::GamePanel;
 use crate::opengl::panels::Panel;
-use crate::units::{Angle, Matrix4x4, RotationXYZ};
+use crate::util::{GlobalLogger, PoisonClearer, ResultLoggerExcept};
 
 
 pub struct OpenGlInterface {}
@@ -31,13 +27,13 @@ impl OpenGlInterface {
     }
 
 
-    pub fn run_game_loop(self, runtime_settings: RuntimeSettings) -> ! {
+    pub fn run_game_loop(self, logger: GlobalLogger, runtime_settings: RuntimeSettings) -> ! {
         let event_loop = glutin_event_loop::EventLoop::new();
         let window_builder = glutin::window::WindowBuilder::new().with_title("War And Economy").with_maximized(true);
         let context_builder = glutin::ContextBuilder::new();
-        let display = Display::new(window_builder, context_builder, &event_loop).unwrap();
+        let display = Display::new(window_builder, context_builder, &event_loop).expect_logger(&logger, "Failed to create window");
 
-        let mut panel: Box<dyn Panel> = Box::new(GamePanel::new(&display).unwrap());
+        let mut panel: Box<dyn Panel> = Box::new(GamePanel::new(&display).expect_logger(&logger, "Failed to create game panel"));
 
         let mut last_frame_time = Instant::now();
         event_loop.run(move |event, _, control_flow| {
@@ -77,7 +73,7 @@ impl OpenGlInterface {
 
             match event_pass_result {
                 Ok(_) => {},
-                Err(error) => eprintln!("Error caught: {error}"),
+                Err(error) => logger.lock().ignore_poison().err(&format!("Event loop error caught: {error}.")),
             }
 
         })

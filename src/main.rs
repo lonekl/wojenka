@@ -4,17 +4,22 @@ pub extern crate glium;
 
 use std::fmt::Debug;
 use std::time::Duration;
+use crate::util::{Logger, PoisonClearer};
 
 pub mod opengl;
 pub mod units;
+pub mod util;
 
 
 
 fn main() -> Result<(), String> {
+    let logger = Logger::new().to_global();
     let runtime_settings = RuntimeSettings::new();
     let opengl = opengl::OpenGlInterface::new()?;
 
-    opengl.run_game_loop(runtime_settings)
+    logger.lock().ignore_poison().info("Wojenka v0.1.1!");
+
+    opengl.run_game_loop(logger, runtime_settings)
 }
 
 
