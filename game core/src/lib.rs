@@ -3,6 +3,7 @@ use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
 use crate::map::terrain::sectors::TileSectorType;
+use crate::map::terrain::surface::{SurfaceType, SurfaceTypes};
 use crate::powers::Power;
 use crate::units::Time;
 
@@ -54,6 +55,7 @@ pub struct Definitions {
 
     pub item_types: Vec<ItemType>,
     pub tile_sector_types: Vec<TileSectorType>,
+    pub surface_types: SurfaceTypes,
 
 }
 
@@ -86,6 +88,18 @@ impl Definitions {
                     Time::from_days(280),
                 ),
             ],
+
+
+
+            surface_types: SurfaceTypes::new(
+                vec![
+                    SurfaceType::new(format!("grass")),
+                    SurfaceType::new(format!("earth")),
+                    SurfaceType::new(format!("stone")),
+                    SurfaceType::new(format!("sand")),
+                ],
+                8
+            ),
 
 
 

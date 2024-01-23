@@ -3,6 +3,26 @@ use crate::units::Time;
 
 
 
+#[derive(Clone)]
+pub struct TileSector {
+
+    pub population: Population,
+
+}
+
+impl TileSector {
+
+    pub fn new(population: Population) -> Self {
+
+        Self {
+            population,
+        }
+    }
+
+}
+
+
+
 pub struct TileSectorType {
 
     pub name: &'static str,
@@ -30,26 +50,6 @@ impl TileSectorType {
 
     pub fn is_getting_rewards(&self, last_rewards: Time, current_time: Time) -> bool {
         last_rewards + self.reward_frequency >= current_time
-    }
-
-}
-
-
-
-#[derive(Clone)]
-pub struct TileSector {
-
-    pub population: Population,
-
-}
-
-impl TileSector {
-
-    pub fn new(population: Population) -> Self {
-
-        Self {
-            population,
-        }
     }
 
 }

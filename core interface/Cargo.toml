@@ -1,0 +1,7 @@
+[package]
+name = "core_interface"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+war_economy_core = { path = "../game core" }
