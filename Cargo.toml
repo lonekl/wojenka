@@ -5,13 +5,12 @@ edition = "2021"
 
 [dependencies]
 war_economy_core = { path = "game core" }
-core_interface = { path = "core interface" }
 
 glium = "0.32.1"
 winit = "0.27.5"
 
 [workspace]
-members = ["game core", "core interface"]
+members = ["game core"]
 
 [profile.release]
 strip = "symbols"

@@ -34,15 +34,17 @@ impl SurfaceTypes {
 pub struct SurfaceType {
 
     name: String,
+    variants: usize,
 
 }
 
 impl SurfaceType {
 
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, variant_amount: usize) -> Self {
 
         Self {
             name,
+            variants: variant_amount,
         }
     }
 

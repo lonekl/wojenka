@@ -7,11 +7,12 @@ use crate::map::terrain::surface::{SurfaceType, SurfaceTypes};
 use crate::powers::Power;
 use crate::units::Time;
 
-pub mod units;
+pub mod image;
 pub mod items;
 pub mod map;
 pub mod population;
 pub mod powers;
+pub mod units;
 
 
 
@@ -93,10 +94,7 @@ impl Definitions {
 
             surface_types: SurfaceTypes::new(
                 vec![
-                    SurfaceType::new(format!("grass")),
-                    SurfaceType::new(format!("earth")),
-                    SurfaceType::new(format!("stone")),
-                    SurfaceType::new(format!("sand")),
+                    SurfaceType::new(format!("grass"), 1),
                 ],
                 8
             ),
