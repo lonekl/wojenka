@@ -93,9 +93,7 @@ impl Definitions {
 
 
             surface_types: SurfaceTypes::new(
-                vec![
-                    SurfaceType::new(format!("grass"), 1),
-                ],
+                vec!["".into()],
                 8
             ),
 
