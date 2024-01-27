@@ -1,5 +1,5 @@
 use png::{BitDepth, ColorType};
-use crate::image::color::Rgb8;
+use crate::image::color::{Rgb8, Rgba8};
 
 
 pub fn pass_bit_depth(raw_image_buffer: &mut [u8], bit_depth: BitDepth) -> Vec<u16> {
@@ -73,7 +73,7 @@ pub fn pass_bit_depth(raw_image_buffer: &mut [u8], bit_depth: BitDepth) -> Vec<u
 
 
 
-pub fn pass_color_type<Color: From<Rgb8>>(image_value_buffer: Vec<u16>, color_type: ColorType) -> Vec<Color> {
+pub fn pass_color_type<Color: From<Rgb8> + From<Rgba8>>(image_value_buffer: Vec<u16>, color_type: ColorType) -> Vec<Color> {
 
     match color_type {
         ColorType::Rgb => {
@@ -89,6 +89,26 @@ pub fn pass_color_type<Color: From<Rgb8>>(image_value_buffer: Vec<u16>, color_ty
                         (image_value_buffer[value_index    ] >> 8) as u8,
                         (image_value_buffer[value_index + 1] >> 8) as u8,
                         (image_value_buffer[value_index + 2] >> 8) as u8,
+                    ).into()
+                );
+            }
+
+            pixels
+        },
+        ColorType::Rgba => {
+            let pixel_amount = image_value_buffer.len() / 4;
+            let mut pixels = vec![];
+            pixels.reserve(pixel_amount);
+
+            for pixel_index in 0..pixel_amount {
+                let value_index = pixel_index * 4;
+
+                pixels.push(
+                    Rgba8::new(
+                        (image_value_buffer[value_index    ] >> 8) as u8,
+                        (image_value_buffer[value_index + 1] >> 8) as u8,
+                        (image_value_buffer[value_index + 2] >> 8) as u8,
+                        (image_value_buffer[value_index + 3] >> 8) as u8,
                     ).into()
                 );
             }

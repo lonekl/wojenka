@@ -2,6 +2,14 @@ pub trait Overdraw<Another> {
     fn overdraw_on(&self, rhs: &mut Another);
 }
 
+pub trait ColorFn {
+
+    const BYTE_LENGTH: usize;
+
+    fn to_raw_bytes(self) -> [u8; Self::BYTE_LENGTH];
+
+}
+
 
 
 #[derive(Clone, Copy, PartialEq)]
@@ -22,6 +30,19 @@ impl Rgb8 {
 
 }
 
+impl ColorFn for Rgb8 {
+    const BYTE_LENGTH: usize = 3;
+
+    fn to_raw_bytes(self) -> [u8; Self::BYTE_LENGTH] {
+
+        [
+            self.r,
+            self.g,
+            self.b,
+        ]
+    }
+}
+
 impl Overdraw<Rgb8> for Rgb8 {
     fn overdraw_on(&self, rhs: &mut Rgb8) {
         *rhs = *self;
@@ -34,10 +55,9 @@ impl Overdraw<Rgba8> for Rgb8 {
     }
 }
 
-impl Into<Rgba8> for Rgb8 {
-    fn into(self) -> Rgba8 {
-
-        Rgba8::new(self.r, self.g, self.b, u8::MAX)
+impl From<Rgba8> for Rgb8 {
+    fn from(value: Rgba8) -> Self {
+        Rgb8::new(value.r, value.g, value.b)
     }
 }
 
@@ -78,6 +98,20 @@ impl Rgba8 {
 
 }
 
+impl ColorFn for Rgba8 {
+    const BYTE_LENGTH: usize = 4;
+
+    fn to_raw_bytes(self) -> [u8; Self::BYTE_LENGTH] {
+
+        [
+            self.r,
+            self.g,
+            self.b,
+            self.a,
+        ]
+    }
+}
+
 impl Overdraw<Rgb8> for Rgba8 {
     fn overdraw_on(&self, rhs: &mut Rgb8) {
 
@@ -98,9 +132,8 @@ impl Overdraw<Rgba8> for Rgba8 {
     }
 }
 
-impl Into<Rgb8> for Rgba8 {
-    fn into(self) -> Rgb8 {
-
-        Rgb8::new(self.r, self.g, self.b)
+impl From<Rgb8> for Rgba8 {
+    fn from(value: Rgb8) -> Self {
+        Rgba8::new(value.r, value.g, value.b, u8::MAX)
     }
 }

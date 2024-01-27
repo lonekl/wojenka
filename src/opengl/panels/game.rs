@@ -1,5 +1,6 @@
 use std::time::Duration;
 use glium::{Depth, DepthTest, Display, DrawParameters, Program, Surface, VertexBuffer};
+use glium::texture::{RawImage2d, SrgbTexture2d};
 use winit::event::KeyboardInput;
 use war_economy_core::Game;
 use crate::opengl::algorithms::{Camera, KeyControls};
@@ -13,6 +14,7 @@ pub struct GamePanel {
 
     terrain_program: Program,
     map_vertex_buffer: VertexBuffer<MapVertex>,
+    map_texture: SrgbTexture2d,
 
     keyboard: KeyControls,
     camera: Camera,
@@ -29,9 +31,14 @@ impl GamePanel {
         camera.position = [0.0, -5.0, -5.0];
         camera.rotation.x = Angle::from_degrees(15.0);
 
+        let raw_map_image = war_economy_core::load_temporary_map_image();
+        let map_image = RawImage2d::from_raw_rgb(raw_map_image.raw_u8_data(), raw_map_image.u32_dimension_tuple());
+        let map_texture = SrgbTexture2d::new(display, map_image).unwrap();
+
         Ok(Self {
             terrain_program: Program::from_source(display, VERTEX_SHADER, FRAGMENT_SHADER, None).to_interface_error()?,
             map_vertex_buffer: VertexBuffer::new(display, &map_tiles_to_vertexes(game.map.get_terrain())).to_interface_error()?,
+            map_texture,
 
             keyboard: KeyControls::new(),
             camera,
@@ -80,10 +87,12 @@ impl Panel for GamePanel {
             &indices,
             &self.terrain_program,
             &uniform!(
-                            projection: projection_matrix.to_arrays(),
-                            rotation: self.camera.rotation.rotation_matrix().to_arrays(),
-                            camera_position: self.camera.position,
-                        ),
+                projection: projection_matrix.to_arrays(),
+                rotation: self.camera.rotation.rotation_matrix().to_arrays(),
+                camera_position: self.camera.position,
+
+                map_texture: &self.map_texture,
+            ),
             &draw_parameters,
         ).to_interface_error()?;
 
@@ -119,11 +128,14 @@ const FRAGMENT_SHADER: &'static str = r#"
 
 in vec2 v_surface_uv;
 
+uniform sampler2D map_texture;
+
 out vec4 color;
 
 void main() {
 
     color = vec4(v_surface_uv.x, 1.0, v_surface_uv.y, 1.0);
+    color = texture(map_texture, v_surface_uv);
 
 }
 

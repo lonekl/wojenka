@@ -1,4 +1,9 @@
+#![feature(generic_const_exprs)]
+
+use std::fs::File;
 use std::sync::Arc;
+use crate::image::color::Rgb8;
+use crate::image::Image;
 use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
@@ -102,4 +107,9 @@ impl Definitions {
         }
     }
 
+}
+
+pub fn load_temporary_map_image() -> Image<Rgb8> {
+
+    Image::load_png(File::open("Orzeły w czerni – kompresja 5.png").expect("No \"Orzeły w czerni – kompresja 5.png\".")).expect("Wrong \"Orzeły w czerni – kompresja 5.png\".")
 }
