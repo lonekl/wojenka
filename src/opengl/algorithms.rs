@@ -66,7 +66,7 @@ pub struct Camera {
 
 impl Camera {
 
-    pub fn new(target_frame_duration: Duration) -> Self {
+    pub fn new() -> Self {
 
         Self {
             rotation: RotationXYZ::ZERO,

@@ -10,7 +10,7 @@ use glium::{glutin, Display};
 use glutin::{event_loop as glutin_event_loop, event as glutin_event};
 use glutin_event::{Event as GlutinEvent, WindowEvent};
 use winit::event_loop::ControlFlow;
-use crate::{ResultStringify, RuntimeSettings};
+use crate::{RuntimeSettings};
 use crate::opengl::error::InterfaceError;
 use crate::opengl::panels::game::GamePanel;
 use crate::opengl::panels::Panel;

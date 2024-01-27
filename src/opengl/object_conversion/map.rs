@@ -13,6 +13,9 @@ pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> 
             let x_offset = width as f32 / -2.0;
             let y_offset = height as f32 / -2.0;
 
+            let x_uv_scale = 1.0 / width as f32;
+            let y_uv_scale = 1.0 / height as f32;
+
 
             for (tile_index, central_tile) in tiles.iter().enumerate() {
                 let tile_y = tile_index / width_usize;
@@ -34,6 +37,8 @@ pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> 
 
 
                 vertex_groups.push(create_tile_square(
+                    x_uv_scale,
+                    y_uv_scale,
                     tile_display_x,
                     tile_display_y,
                     central_tile.height.to_10km_f32(),
@@ -64,6 +69,8 @@ pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> 
 }
 
 fn create_tile_square(
+    x_uv_scale: f32,
+    y_uv_scale: f32,
     tile_x: f32,
     tile_y: f32,
     central_height: f32,
@@ -76,6 +83,14 @@ fn create_tile_square(
     north_west_height: f32,
     north_east_height: f32,
 ) -> [MapVertex; 24] {
+    let neg_x_uv = tile_x * x_uv_scale + 0.5;
+    let central_x_uv = (tile_x + 0.5) * x_uv_scale + 0.5;
+    let pos_x_uv = (tile_x + 1.0) * x_uv_scale + 0.5;
+
+    let neg_y_uv = -tile_y * y_uv_scale + 0.5;
+    let central_y_uv = -(tile_y + 0.5) * y_uv_scale + 0.5;
+    let pos_y_uv = -(tile_y + 1.0) * y_uv_scale + 0.5;
+
     let west_central_height = (west_height + central_height) / 2.0;
     let east_central_height = (east_height + central_height) / 2.0;
     let south_central_height = (south_height + central_height) / 2.0;
@@ -87,29 +102,49 @@ fn create_tile_square(
     let north_west_central_height = (north_west_height + north_height + west_height + central_height) / 4.0;
 
     let vertex_array_2d = [
-        MapVertex::create_square(
+        MapVertex::create_map_square(
             [tile_x,       tile_y, -south_west_central_height],
             [tile_x + 0.5, tile_y,      -south_central_height],
             [tile_x,       tile_y + 0.5, -west_central_height],
             [tile_x + 0.5, tile_y + 0.5,      -central_height],
+
+            neg_x_uv,
+            central_x_uv,
+            neg_y_uv,
+            central_y_uv,
         ),
-        MapVertex::create_square(
+        MapVertex::create_map_square(
             [tile_x + 0.5, tile_y,      -south_central_height],
             [tile_x + 1.0, tile_y, -south_east_central_height],
             [tile_x + 0.5, tile_y + 0.5,      -central_height],
             [tile_x + 1.0, tile_y + 0.5, -east_central_height],
+
+            central_x_uv,
+            pos_x_uv,
+            neg_y_uv,
+            central_y_uv,
         ),
-        MapVertex::create_square(
+        MapVertex::create_map_square(
             [tile_x,       tile_y + 0.5,       -west_central_height],
             [tile_x + 0.5, tile_y + 0.5,            -central_height],
             [tile_x,       tile_y + 1.0, -north_west_central_height],
             [tile_x + 0.5, tile_y + 1.0,      -north_central_height],
+
+            neg_x_uv,
+            central_x_uv,
+            central_y_uv,
+            pos_y_uv,
         ),
-        MapVertex::create_square(
+        MapVertex::create_map_square(
             [tile_x + 0.5, tile_y + 0.5,            -central_height],
             [tile_x + 1.0, tile_y + 0.5,       -east_central_height],
             [tile_x + 0.5, tile_y + 1.0,      -north_central_height],
             [tile_x + 1.0, tile_y + 1.0, -north_east_central_height],
+
+            central_x_uv,
+            pos_x_uv,
+            central_y_uv,
+            pos_y_uv,
         ),
     ];
 

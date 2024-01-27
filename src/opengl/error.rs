@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Display as FmtDisplay, Formatter, Write};
-use glium::{Display as GliumDisplay, DrawError, ProgramCreationError, SwapBuffersError};
+use std::fmt::{Debug, Display as FmtDisplay, Formatter};
+use glium::{DrawError, ProgramCreationError, SwapBuffersError};
 use glium::glutin::CreationError;
 use glium::vertex::BufferCreationError as VertexBufferCreationError;
 
