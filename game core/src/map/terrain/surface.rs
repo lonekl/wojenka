@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use crate::AssetLoadError;
 use crate::image::color::Rgb8;
 use crate::image::Image;
 use crate::map::units::TerrainPart;
@@ -9,6 +10,18 @@ pub struct TileSurface {
 
     part: TerrainPart,
     variant: usize,
+
+}
+
+impl TileSurface {
+
+    pub fn new(part: TerrainPart, variant: usize) -> Self {
+
+        Self {
+            part,
+            variant,
+        }
+    }
 
 }
 
@@ -37,19 +50,20 @@ impl SurfaceTypes {
 
 pub struct SurfaceType {
 
-    name: String,
+    name_id: String,
     variants: Vec<Image<Rgb8>>,
 
 }
 
 impl SurfaceType {
 
-    pub fn new(directory_path: PathBuf, variant_amount: usize) -> Self {
+    pub fn new(directory_path: PathBuf, variant_amount: usize) -> Result<Self, AssetLoadError> {
+        let a = directory_path.file_name();
 
-        Self {
-            name: directory_path.file_name().unwrap().to_string_lossy().into(),
+        Ok(Self {
+            name_id: directory_path.file_name().unwrap().to_string_lossy().into(),
             variants: vec![],
-        }
+        })
     }
 
 }

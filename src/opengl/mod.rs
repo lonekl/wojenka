@@ -29,7 +29,7 @@ impl OpenGlInterface {
 
     pub fn run_game_loop(self, logger: GlobalLogger, runtime_settings: RuntimeSettings) -> ! {
         let event_loop = glutin_event_loop::EventLoop::new();
-        let window_builder = glutin::window::WindowBuilder::new().with_title("War And Economy").with_maximized(true);
+        let window_builder = glutin::window::WindowBuilder::new().with_title("Wojenka").with_maximized(true);
         let context_builder = glutin::ContextBuilder::new();
         let display = Display::new(window_builder, context_builder, &event_loop).expect_logger(&logger, "Failed to create window");
 

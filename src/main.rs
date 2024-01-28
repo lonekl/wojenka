@@ -17,7 +17,7 @@ fn main() -> Result<(), String> {
     let runtime_settings = RuntimeSettings::new();
     let opengl = opengl::OpenGlInterface::new()?;
 
-    logger.lock().ignore_poison().info("Wojenka v0.1.1!");
+    logger.lock().ignore_poison().info("Wojenka v0.1.2!");
 
     opengl.run_game_loop(logger, runtime_settings)
 }

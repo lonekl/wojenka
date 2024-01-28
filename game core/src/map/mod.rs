@@ -3,16 +3,18 @@ pub mod units;
 
 use std::sync::Arc;
 use crate::map::terrain::sectors::{TileSector};
-use crate::map::units::{HeightVariation, TerrainHeight};
+use crate::map::units::{HeightVariation, TerrainHeight, TerrainPart};
 use crate::population::Population;
 use crate::units::Time;
 use crate::Definitions;
+use crate::map::terrain::surface::TileSurface;
 
 pub struct Map {
 
     shape: MapShape,
     tiles: Vec<Tile>,
     tile_sectors: Vec<SectorTiles>,
+    tile_surfaces: Vec<TileSurface>,
 
 }
 
@@ -20,7 +22,8 @@ impl Map {
 
     pub fn new(definitions: Arc<Definitions>, shape: MapShape, start_time: Time) -> Self {
         let tile_amount = shape.tile_amount() as usize;
-        let mut tile_sectors = Vec::new();
+        let mut tile_sectors = vec![];
+        let mut tile_surfaces = vec![];
 
         for tile_sector_type in &definitions.tile_sector_types {
             let last_rewards = tile_sector_type.last_rewards(start_time);
@@ -35,6 +38,14 @@ impl Map {
 
         }
 
+        for _surface_type in definitions.surface_types {
+
+            tile_surfaces.push(SurfaceTiles {
+                tiles: vec![TileSurface::new(TerrainPart::from_8bit_scale(255), 0); tile_amount],
+            })
+
+        }
+
         Self {
             shape,
             tiles: {
@@ -42,6 +53,8 @@ impl Map {
 
                 result[25].height = TerrainHeight::from_meters(3000);
                 result[35].height = TerrainHeight::from_meters(7500);
+
+                result[11].height = TerrainHeight::from_meters(-10000);
 
                 result
             },
@@ -76,25 +89,6 @@ impl Map {
     pub fn get_terrain(&self) -> (MapShape, &Vec<Tile>) {
 
         (self.shape, &self.tiles)
-    }
-
-}
-
-
-#[derive(Clone, Copy)]
-pub enum MapShape {
-
-    Rectangular { width: u32, height: u32 }
-
-}
-
-impl MapShape {
-
-    pub fn tile_amount(&self) -> u32 {
-
-        match self {
-            MapShape::Rectangular { width, height } => width * height,
-        }
     }
 
 }
@@ -148,6 +142,34 @@ impl SectorTiles {
         }
 
         is_getting_rewards
+    }
+
+}
+
+
+
+pub struct SurfaceTiles {
+
+    tiles: Vec<TileSurface>,
+
+}
+
+
+
+#[derive(Clone, Copy)]
+pub enum MapShape {
+
+    Rectangular { width: u32, height: u32 }
+
+}
+
+impl MapShape {
+
+    pub fn tile_amount(&self) -> u32 {
+
+        match self {
+            MapShape::Rectangular { width, height } => width * height,
+        }
     }
 
 }

@@ -109,7 +109,17 @@ impl Definitions {
 
 }
 
+
+
 pub fn load_temporary_map_image() -> Image<Rgb8> {
 
     Image::load_png(File::open("Orzeły w czerni – kompresja 5.png").expect("No \"Orzeły w czerni – kompresja 5.png\".")).expect("Wrong \"Orzeły w czerni – kompresja 5.png\".")
+}
+
+
+
+pub enum AssetLoadError {
+
+    InvalidPath,
+
 }
