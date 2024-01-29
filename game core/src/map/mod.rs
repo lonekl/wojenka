@@ -14,7 +14,7 @@ pub struct Map {
     shape: MapShape,
     tiles: Vec<Tile>,
     tile_sectors: Vec<SectorTiles>,
-    tile_surfaces: Vec<TileSurface>,
+    tile_surfaces: Vec<SurfaceTiles>,
 
 }
 
@@ -38,7 +38,7 @@ impl Map {
 
         }
 
-        for _surface_type in definitions.surface_types {
+        for _surface_type in &definitions.surface_types.types {
 
             tile_surfaces.push(SurfaceTiles {
                 tiles: vec![TileSurface::new(TerrainPart::from_8bit_scale(255), 0); tile_amount],
@@ -59,6 +59,7 @@ impl Map {
                 result
             },
             tile_sectors,
+            tile_surfaces,
         }
     }
 
