@@ -7,14 +7,16 @@ use crate::map::units::{HeightVariation, TerrainHeight, TerrainPart};
 use crate::population::Population;
 use crate::units::Time;
 use crate::Definitions;
+use crate::image::Dimensions;
 use crate::map::terrain::surface::TileSurface;
+
+
 
 pub struct Map {
 
     shape: MapShape,
     tiles: Vec<Tile>,
     tile_sectors: Vec<SectorTiles>,
-    tile_surfaces: Vec<SurfaceTiles>,
 
 }
 
@@ -23,7 +25,6 @@ impl Map {
     pub fn new(definitions: Arc<Definitions>, shape: MapShape, start_time: Time) -> Self {
         let tile_amount = shape.tile_amount() as usize;
         let mut tile_sectors = vec![];
-        let mut tile_surfaces = vec![];
 
         for tile_sector_type in &definitions.tile_sector_types {
             let last_rewards = tile_sector_type.last_rewards(start_time);
@@ -38,18 +39,18 @@ impl Map {
 
         }
 
-        for _surface_type in &definitions.surface_types.types {
-
-            tile_surfaces.push(SurfaceTiles {
-                tiles: vec![TileSurface::new(TerrainPart::from_8bit_scale(255), 0); tile_amount],
-            })
-
-        }
-
         Self {
             shape,
             tiles: {
-                let mut result = vec![Tile::new(3); tile_amount];
+                let mut result = vec![
+                    Tile::new(
+                        3,
+                        vec![
+                            TileSurface::new(TerrainPart::from_8bit_scale(255), 0)
+                        ]
+                    );
+                    tile_amount
+                ];
 
                 result[25].height = TerrainHeight::from_meters(3000);
                 result[35].height = TerrainHeight::from_meters(7500);
@@ -59,17 +60,9 @@ impl Map {
                 result
             },
             tile_sectors,
-            tile_surfaces,
         }
     }
 
-
-    fn x_y_index(&self, x: u32, y: u32) -> usize {
-
-        match self.shape {
-            MapShape::Rectangular { width, .. } => (x + y * width) as usize,
-        }
-    }
 
 
     pub fn tick(&mut self, definitions: &Arc<Definitions>, tick_length: Time) {
@@ -87,11 +80,61 @@ impl Map {
     }
 
 
+
+    fn x_y_index(&self, x: u32, y: u32) -> usize {
+
+        match self.shape {
+            MapShape::Rectangular { width, .. } => (x + y * width) as usize,
+        }
+    }
+
+    pub fn image_dimensions(&self, tile_dimensions: Dimensions) -> Dimensions {
+
+        match self.shape {
+            MapShape::Rectangular { width, height } => tile_dimensions * Dimensions::new(width as usize, height as usize),
+        }
+    }
+
     pub fn get_terrain(&self) -> (MapShape, &Vec<Tile>) {
 
         (self.shape, &self.tiles)
     }
 
+
+
+    pub fn iter_tiles(&self) -> MapTileIterator {
+
+
+
+    }
+
+}
+
+
+
+pub struct MapTileIterator<'a> {
+
+    tiles: &'a [Tile],
+    shape: MapShape,
+
+    current: usize,
+
+}
+
+impl<'a> Iterator for MapTileIterator<'a> {
+    type Item = &'a Tile;
+
+    fn next(&mut self) -> Option<Self::Item> {
+
+        if self.current + 1 >= self.tiles.len() {
+
+            return None;
+        }
+
+        self.current += 1;
+
+        Some(&self.tiles[self.current - 1])
+    }
 }
 
 
@@ -103,6 +146,8 @@ pub struct Tile {
     pub height: TerrainHeight,
     pub height_variation: HeightVariation,
 
+    pub surface: Vec<TileSurface>,
+
     /// What power is owner of that terrain.
     owner: usize,
 
@@ -110,11 +155,13 @@ pub struct Tile {
 
 impl Tile {
 
-    pub fn new(owner: usize) -> Self {
+    pub fn new(owner: usize, surface: Vec<TileSurface>) -> Self {
 
         Self {
             height: TerrainHeight::from_meters(10),
             height_variation: HeightVariation::from_meters(3),
+
+            surface,
 
             owner,
         }
@@ -144,14 +191,6 @@ impl SectorTiles {
 
         is_getting_rewards
     }
-
-}
-
-
-
-pub struct SurfaceTiles {
-
-    tiles: Vec<TileSurface>,
 
 }
 

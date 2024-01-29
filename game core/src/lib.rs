@@ -24,7 +24,7 @@ pub mod units;
 
 pub struct Game {
 
-    definitions: Arc<Definitions>,
+    pub definitions: Arc<Definitions>,
     pub powers: Vec<Power>,
 
     world_time: Time,
@@ -99,9 +99,9 @@ impl Definitions {
 
 
             surface_types: SurfaceTypes::new(
-                vec!["".into()],
+                vec!["game sets/historical/surface/grass".into()],
                 8
-            ),
+            ).unwrap(),
 
 
 

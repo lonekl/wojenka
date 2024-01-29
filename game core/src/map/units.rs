@@ -13,6 +13,13 @@ impl TerrainPart {
         Self ( (part as u16) << 8)
     }
 
+
+
+    pub fn rescale_texture_levels(self, max: u8) -> u8 {
+
+        (self.0 as u32  *  max as u32  /  u16::MAX as u32) as u8
+    }
+
 }
 
 

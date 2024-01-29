@@ -1,5 +1,5 @@
 use std::io::Read;
-use std::ops::Add;
+use std::ops::{Add, Mul};
 use std::time::Duration;
 use png::{Decoder, DecodingError, OutputInfo};
 use crate::image::color::{ColorFn, Overdraw, Rgb8, Rgba8};
@@ -53,6 +53,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
     }
 
 
+
     pub fn overdraw_shaped_image<
         Filler:     ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
         ShapeColor: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>,
@@ -76,6 +77,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
     }
 
 
+
     pub fn raw_u8_data(&self) -> Vec<u8>
         where [(); Color::BYTE_LENGTH]: Sized
     {
@@ -89,6 +91,11 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
         }
 
         data
+    }
+
+    pub fn dimensions(&self) -> Dimensions {
+
+        self.dimensions
     }
 
     pub fn u32_dimension_tuple(&self) -> (u32, u32) {
@@ -184,6 +191,18 @@ impl Add<Dimensions> for Dimensions {
         Self {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Mul<Dimensions> for Dimensions {
+    type Output = Dimensions;
+
+    fn mul(self, rhs: Dimensions) -> Self::Output {
+
+        Self {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
         }
     }
 }
