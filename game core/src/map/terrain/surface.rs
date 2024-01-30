@@ -2,7 +2,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use crate::error::{CoreResult, OptionToCoreError, ResultToCoreError, CoreError};
 use crate::image::color::Rgb8;
-use crate::image::{Dimensions, Image};
+use crate::image::{Dimensions, Image, ImageResult};
 use crate::map::{Map, Tile};
 use crate::map::units::TerrainPart;
 
@@ -57,13 +57,27 @@ impl SurfaceTypes {
         })
     }
 
-    pub fn build_surface_texture(&self, map: &Map) -> Image<Rgb8> {
+    pub fn build_surface_texture(&self, map: &Map) -> ImageResult<Image<Rgb8>> {
+        let layers = Image::new_uniform(Rgb8::new(0, 0, 0), Dimensions::new(24, 24));
         let tile_dimensions = self.layers.dimensions();
-        let mut surface_texture = Image::new_uniform(Rgb8::new(21, 255, 37), map.image_dimensions(tile_dimensions));
+        let mut surface_texture = Image::new_uniform(Rgb8::new(255, 0, 255), map.image_dimensions(tile_dimensions));
 
+        for (tile_index, tile) in (&map.tiles).iter().enumerate() {
+            let tile_pos_tuple = map.index_to_xy(tile_index);
+            let tile_pos = Dimensions::from_u32_tuple(tile_pos_tuple);
+            let image_tile_pos = tile_dimensions * tile_pos;
+            eprintln!("Tile pos: {tile_pos_tuple:?}.");
 
+            surface_texture.overdraw_shaped_image(
+                &self.types[0].variants[0],
+                image_tile_pos,
+                &layers,
+                Rgb8::new(0, 0, 0),
+            )?;
 
-        surface_texture
+        }
+
+        Ok(surface_texture)
     }
 
 }

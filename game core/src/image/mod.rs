@@ -57,7 +57,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
     pub fn overdraw_shaped_image<
         Filler:     ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
         ShapeColor: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>,
-    >(&mut self, filler: Image<Filler>, draw_offset: Dimensions, shape: Image<ShapeColor>, shape_color: ShapeColor) -> ImageResult<()> {
+    >(&mut self, filler: &Image<Filler>, draw_offset: Dimensions, shape: &Image<ShapeColor>, shape_color: ShapeColor) -> ImageResult<()> {
 
         if ! (filler.dimensions == shape.dimensions) {
             return Err(ImageError::DifferentDimensions);
@@ -98,11 +98,6 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
         self.dimensions
     }
 
-    pub fn u32_dimension_tuple(&self) -> (u32, u32) {
-
-        (self.dimensions.x as u32, self.dimensions.y as u32)
-    }
-
 }
 
 
@@ -122,6 +117,7 @@ impl Iterator for DimensionIterator {
         self.current.x += 1;
 
         if self.current.x == self.limit.x {
+            self.current.x = 0;
             self.current.y += 1;
 
             if self.current.y == self.limit.y {
@@ -152,10 +148,16 @@ impl Dimensions {
         Self::new(info.width as usize, info.height as usize)
     }
 
+    pub fn from_u32_tuple(tuple: (u32, u32)) -> Self {
+
+        Self::new(tuple.0 as usize, tuple.1 as usize)
+    }
+
     pub fn new(x: usize, y: usize) -> Self {
 
         Self { x, y }
     }
+
 
 
     pub fn index_on_bigger_image(&self, width: usize) -> usize {
@@ -166,6 +168,13 @@ impl Dimensions {
     pub fn len(&self) -> usize {
 
         self.x * self.y
+    }
+
+
+
+    pub fn to_u32_tuple(&self) -> (u32, u32) {
+
+        (self.x as u32, self.y as u32)
     }
 
 }

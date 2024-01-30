@@ -81,10 +81,17 @@ impl Map {
 
 
 
-    fn x_y_index(&self, x: u32, y: u32) -> usize {
+    fn xy_to_index(&self, x: u32, y: u32) -> usize {
 
         match self.shape {
             MapShape::Rectangular { width, .. } => (x + y * width) as usize,
+        }
+    }
+
+    pub fn index_to_xy(&self, index: usize) -> (u32, u32) {
+
+        match self.shape {
+            MapShape::Rectangular { width, .. } => (index as u32 % width, index as u32 / width),
         }
     }
 
@@ -102,17 +109,21 @@ impl Map {
 
 
 
-    pub fn iter_tiles(&self) -> MapTileIterator {
+    /*pub fn iter_tiles(&self) -> MapTileIterator {
 
+        MapTileIterator {
+            tiles: &self.tiles,
+            shape: self.shape,
 
-
-    }
+            current: 0,
+        }
+    }*/
 
 }
 
 
 
-pub struct MapTileIterator<'a> {
+/*pub struct MapTileIterator<'a> {
 
     tiles: &'a [Tile],
     shape: MapShape,
@@ -122,20 +133,20 @@ pub struct MapTileIterator<'a> {
 }
 
 impl<'a> Iterator for MapTileIterator<'a> {
-    type Item = &'a Tile;
+    type Item = (&'a Tile);
 
     fn next(&mut self) -> Option<Self::Item> {
-
-        if self.current + 1 >= self.tiles.len() {
+        if self.current == self.tiles.len() {
 
             return None;
         }
 
+        let tile = &self.tiles[self.current];
         self.current += 1;
 
-        Some(&self.tiles[self.current - 1])
+        Some(tile)
     }
-}
+}*/
 
 
 
