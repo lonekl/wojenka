@@ -32,7 +32,6 @@ impl GamePanel {
         camera.position = [0.0, -5.0, -5.0];
         camera.rotation.x = Angle::from_degrees(15.0);
 
-        //let raw_map_image = war_economy_core::load_temporary_map_image();
         let raw_map_image = game.definitions.surface_types.build_surface_texture(&game.map).unwrap();
         let map_image = RawImage2d::from_raw_rgb(raw_map_image.raw_u8_bytes(), raw_map_image.dimensions().to_u32_tuple());
         let map_texture = SrgbTexture2d::new(display, map_image).unwrap();
