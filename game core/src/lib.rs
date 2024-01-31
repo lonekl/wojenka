@@ -8,7 +8,7 @@ use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
 use crate::map::terrain::sectors::TileSectorType;
-use crate::map::terrain::surface::{SurfaceType, SurfaceTypes};
+use crate::map::terrain::surface::{SurfaceTypes};
 use crate::powers::Power;
 use crate::units::Time;
 

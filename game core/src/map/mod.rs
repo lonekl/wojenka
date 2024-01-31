@@ -7,7 +7,7 @@ use crate::map::units::{HeightVariation, TerrainHeight, TerrainPart};
 use crate::population::Population;
 use crate::units::Time;
 use crate::Definitions;
-use crate::image::Dimensions;
+use crate::image::ImageDimensions;
 use crate::map::terrain::surface::TileSurface;
 
 
@@ -95,10 +95,10 @@ impl Map {
         }
     }
 
-    pub fn image_dimensions(&self, tile_dimensions: Dimensions) -> Dimensions {
+    pub fn image_dimensions(&self, tile_dimensions: ImageDimensions) -> ImageDimensions {
 
         match self.shape {
-            MapShape::Rectangular { width, height } => tile_dimensions * Dimensions::new(width as usize, height as usize),
+            MapShape::Rectangular { width, height } => tile_dimensions * ImageDimensions::new(width as usize, height as usize),
         }
     }
 

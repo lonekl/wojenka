@@ -1,6 +1,5 @@
 use std::io::Read;
 use std::ops::{Add, Mul};
-use std::time::Duration;
 use png::{Decoder, DecodingError, OutputInfo};
 use crate::image::color::{ColorFn, Overdraw, Rgb8, Rgba8};
 
@@ -12,13 +11,13 @@ pub mod file_load;
 pub struct Image<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> {
 
     pixels: Vec<Color>,
-    dimensions: Dimensions,
+    dimensions: ImageDimensions,
 
 }
 
 impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image<Color> {
 
-    pub fn new_raw(image: Vec<Color>, dimensions: Dimensions) -> ImageResult<Self> {
+    pub fn new_raw(image: Vec<Color>, dimensions: ImageDimensions) -> ImageResult<Self> {
         if dimensions.len() != image.len() {
             return Err(ImageError::DifferentDimensions);
         }
@@ -29,7 +28,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
         })
     }
 
-    pub fn new_uniform(filler: Color, dimensions: Dimensions) -> Self {
+    pub fn new_uniform(filler: Color, dimensions: ImageDimensions) -> Self {
 
         Self {
             pixels: vec![filler; dimensions.len()],
@@ -49,7 +48,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
         let image = file_load::pass_color_type(image_value_buffer, info.color_type);
 
-        Self::new_raw(image, Dimensions::from_png_info(info))
+        Self::new_raw(image, ImageDimensions::from_png_info(info))
     }
 
 
@@ -57,16 +56,16 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
     pub fn overdraw_shaped_image<
         Filler:     ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
         ShapeColor: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>,
-    >(&mut self, filler: &Image<Filler>, draw_offset: Dimensions, shape: &Image<ShapeColor>, shape_color: ShapeColor) -> ImageResult<()> {
+    >(&mut self, filler: &Image<Filler>, draw_offset: ImageDimensions, shape: &Image<ShapeColor>, shape_color: ShapeColor) -> ImageResult<()> {
 
         if ! (filler.dimensions == shape.dimensions) {
             return Err(ImageError::DifferentDimensions);
         }
 
         for filler_position in filler.dimensions {
-            let raw_filler_position = filler_position.len();
+            let raw_filler_position = filler_position.index_on_bigger_image(filler.dimensions.x);
             let self_position = filler_position + draw_offset;
-            let raw_self_position = self_position.len();
+            let raw_self_position = self_position.index_on_bigger_image(self.dimensions.x);
 
             if shape.pixels[raw_filler_position] == shape_color {
                 filler.pixels[raw_filler_position].overdraw_on(&mut self.pixels[raw_self_position]);
@@ -78,7 +77,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
 
 
-    pub fn raw_u8_data(&self) -> Vec<u8>
+    pub fn raw_u8_bytes(&self) -> Vec<u8>
         where [(); Color::BYTE_LENGTH]: Sized
     {
         let mut data = vec![];
@@ -93,7 +92,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
         data
     }
 
-    pub fn dimensions(&self) -> Dimensions {
+    pub fn dimensions(&self) -> ImageDimensions {
 
         self.dimensions
     }
@@ -102,46 +101,47 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
 
 
-pub struct DimensionIterator {
+pub struct ImageDimensionIterator {
 
-    current: Dimensions,
-    limit: Dimensions,
+    current: ImageDimensions,
+    limit: ImageDimensions,
 
 }
 
-impl Iterator for DimensionIterator {
-    type Item = Dimensions;
+impl Iterator for ImageDimensionIterator {
+    type Item = ImageDimensions;
 
     fn next(&mut self) -> Option<Self::Item> {
+        let original_current = self.current;
+
+        if self.current.y == self.limit.y {
+            return None;
+        }
 
         self.current.x += 1;
 
         if self.current.x == self.limit.x {
             self.current.x = 0;
             self.current.y += 1;
-
-            if self.current.y == self.limit.y {
-                return None;
-            }
         }
 
-        Some(self.current)
+        Some(original_current)
     }
 }
 
 
 
-#[derive(Clone, Copy, PartialEq)]
-pub struct Dimensions {
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct ImageDimensions {
 
     pub x: usize,
     pub y: usize,
 
 }
 
-impl Dimensions {
+impl ImageDimensions {
 
-    pub const ZERO: Dimensions = Dimensions { x: 0, y: 0 };
+    pub const ZERO: ImageDimensions = ImageDimensions { x: 0, y: 0 };
 
     pub fn from_png_info(info: OutputInfo) -> Self {
 
@@ -179,23 +179,23 @@ impl Dimensions {
 
 }
 
-impl IntoIterator for Dimensions {
-    type Item = Dimensions;
-    type IntoIter = DimensionIterator;
+impl IntoIterator for ImageDimensions {
+    type Item = ImageDimensions;
+    type IntoIter = ImageDimensionIterator;
 
     fn into_iter(self) -> Self::IntoIter {
 
-        DimensionIterator {
-            current: Dimensions::ZERO,
+        ImageDimensionIterator {
+            current: ImageDimensions::ZERO,
             limit: self,
         }
     }
 }
 
-impl Add<Dimensions> for Dimensions {
-    type Output = Dimensions;
+impl Add<ImageDimensions> for ImageDimensions {
+    type Output = ImageDimensions;
 
-    fn add(self, rhs: Dimensions) -> Self::Output {
+    fn add(self, rhs: ImageDimensions) -> Self::Output {
 
         Self {
             x: self.x + rhs.x,
@@ -204,10 +204,10 @@ impl Add<Dimensions> for Dimensions {
     }
 }
 
-impl Mul<Dimensions> for Dimensions {
-    type Output = Dimensions;
+impl Mul<ImageDimensions> for ImageDimensions {
+    type Output = ImageDimensions;
 
-    fn mul(self, rhs: Dimensions) -> Self::Output {
+    fn mul(self, rhs: ImageDimensions) -> Self::Output {
 
         Self {
             x: self.x * rhs.x,

@@ -1,6 +1,7 @@
 use std::time::Duration;
 use glium::{Depth, DepthTest, Display, DrawParameters, Program, Surface, VertexBuffer};
 use glium::texture::{RawImage2d, SrgbTexture2d};
+use glium::uniforms::{MagnifySamplerFilter, Sampler};
 use winit::event::KeyboardInput;
 use war_economy_core::Game;
 use crate::opengl::algorithms::{Camera, KeyControls};
@@ -31,9 +32,9 @@ impl GamePanel {
         camera.position = [0.0, -5.0, -5.0];
         camera.rotation.x = Angle::from_degrees(15.0);
 
-        let raw_map_image = war_economy_core::load_temporary_map_image();
+        //let raw_map_image = war_economy_core::load_temporary_map_image();
         let raw_map_image = game.definitions.surface_types.build_surface_texture(&game.map).unwrap();
-        let map_image = RawImage2d::from_raw_rgb(raw_map_image.raw_u8_data(), raw_map_image.dimensions().to_u32_tuple());
+        let map_image = RawImage2d::from_raw_rgb(raw_map_image.raw_u8_bytes(), raw_map_image.dimensions().to_u32_tuple());
         let map_texture = SrgbTexture2d::new(display, map_image).unwrap();
 
         Ok(Self {
@@ -92,7 +93,7 @@ impl Panel for GamePanel {
                 rotation: self.camera.rotation.rotation_matrix().to_arrays(),
                 camera_position: self.camera.position,
 
-                map_texture: &self.map_texture,
+                map_texture: Sampler::new(&self.map_texture).magnify_filter(MagnifySamplerFilter::Nearest),
             ),
             &draw_parameters,
         ).to_interface_error()?;
@@ -136,7 +137,10 @@ out vec4 color;
 void main() {
 
     color = vec4(v_surface_uv.x, 1.0, v_surface_uv.y, 1.0);
-    color = texture(map_texture, v_surface_uv);
+    color = texture(
+        map_texture,
+        v_surface_uv
+    );
 
 }
 
