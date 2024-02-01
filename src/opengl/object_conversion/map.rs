@@ -1,8 +1,9 @@
 use war_economy_core::map::{MapShape, Tile};
+use war_economy_core::map::units::TerrainHeight;
 use crate::opengl::triangles::MapVertex;
 
-pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> {
-    let (map_shape, tiles) = terrain;
+pub fn map_tiles_to_vertexes(terrain: (MapShape, TerrainHeight, &Vec<Tile>)) -> Vec<MapVertex> {
+    let (map_shape, tile_size, tiles) = terrain;
 
     let mut vertex_groups = vec![];
 
@@ -41,15 +42,15 @@ pub fn map_tiles_to_vertexes(terrain: (MapShape, &Vec<Tile>)) -> Vec<MapVertex> 
                     y_uv_scale,
                     tile_display_x,
                     tile_display_y,
-                    central_tile.height.to_10km_f32(),
-                    west_tile.height.to_10km_f32(),
-                    east_tile.height.to_10km_f32(),
-                    north_tile.height.to_10km_f32(),
-                    south_tile.height.to_10km_f32(),
-                    south_west_tile.height.to_10km_f32(),
-                    south_east_tile.height.to_10km_f32(),
-                    north_west_tile.height.to_10km_f32(),
-                    north_east_tile.height.to_10km_f32(),
+                    central_tile.height.to_f32_rescaled(tile_size),
+                    west_tile.height.to_f32_rescaled(tile_size),
+                    east_tile.height.to_f32_rescaled(tile_size),
+                    north_tile.height.to_f32_rescaled(tile_size),
+                    south_tile.height.to_f32_rescaled(tile_size),
+                    south_west_tile.height.to_f32_rescaled(tile_size),
+                    south_east_tile.height.to_f32_rescaled(tile_size),
+                    north_west_tile.height.to_f32_rescaled(tile_size),
+                    north_east_tile.height.to_f32_rescaled(tile_size),
                 ));
 
             }

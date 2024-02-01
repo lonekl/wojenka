@@ -9,6 +9,7 @@ use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
 use crate::map::terrain::sectors::TileSectorType;
 use crate::map::terrain::surface::{SurfaceTypes};
+use crate::map::units::TerrainHeight;
 use crate::powers::Power;
 use crate::units::Time;
 
@@ -50,7 +51,7 @@ impl Game {
 
             world_time,
 
-            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 10, height: 10}, world_time),
+            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 10, height: 10}, TerrainHeight::from_meters(10_000), world_time),
         }
     }
 

@@ -34,6 +34,8 @@ impl TerrainHeight {
         Self ( altitude)
     }
 
+
+
     pub fn to_meters(self) -> i32 {
 
         self.0
@@ -42,6 +44,13 @@ impl TerrainHeight {
     pub fn to_10km_f32(self) -> f32 {
 
         self.0 as f32 / 10_000.0
+    }
+
+
+
+    pub fn to_f32_rescaled(self, scale: Self) -> f32 {
+
+        self.0 as f32 / scale.0 as f32
     }
 
 }

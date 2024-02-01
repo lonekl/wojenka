@@ -3,7 +3,7 @@ pub mod units;
 
 use std::sync::Arc;
 use crate::map::terrain::sectors::{TileSector};
-use crate::map::units::{HeightVariation, TerrainHeight, TerrainPart};
+use crate::map::units::{HeightVariation, TerrainHeight};
 use crate::population::Population;
 use crate::units::Time;
 use crate::Definitions;
@@ -15,6 +15,8 @@ use crate::map::terrain::surface::TileSurface;
 pub struct Map {
 
     shape: MapShape,
+    tile_size: TerrainHeight,
+
     tiles: Vec<Tile>,
     tile_sectors: Vec<SectorTiles>,
 
@@ -22,7 +24,7 @@ pub struct Map {
 
 impl Map {
 
-    pub fn new(definitions: Arc<Definitions>, shape: MapShape, start_time: Time) -> Self {
+    pub fn new(definitions: Arc<Definitions>, shape: MapShape, tile_size: TerrainHeight, start_time: Time) -> Self {
         let tile_amount = shape.tile_amount() as usize;
         let mut tile_sectors = vec![];
 
@@ -41,6 +43,7 @@ impl Map {
 
         Self {
             shape,
+            tile_size,
             tiles: {
                 let mut result = vec![
                     Tile::new(
@@ -100,9 +103,9 @@ impl Map {
         }
     }
 
-    pub fn get_terrain(&self) -> (MapShape, &Vec<Tile>) {
+    pub fn get_terrain(&self) -> (MapShape, TerrainHeight, &Vec<Tile>) {
 
-        (self.shape, &self.tiles)
+        (self.shape, self.tile_size, &self.tiles)
     }
 
 
@@ -148,7 +151,6 @@ impl<'a> Iterator for MapTileIterator<'a> {
 
 
 
-/// One tile has area of: 10km * 10km, or 100km².
 #[derive(Clone)]
 pub struct Tile {
 

@@ -1,5 +1,5 @@
 use std::time::Duration;
-use glium::{Depth, DepthTest, Display, DrawParameters, Program, Surface, VertexBuffer};
+use glium::{BackfaceCullingMode, Depth, DepthTest, Display, DrawParameters, Program, Surface, VertexBuffer};
 use glium::texture::{RawImage2d, SrgbTexture2d};
 use glium::uniforms::{MagnifySamplerFilter, Sampler};
 use winit::event::KeyboardInput;
@@ -80,6 +80,7 @@ impl Panel for GamePanel {
                 write: true,
                 .. Default::default()
             },
+            backface_culling: BackfaceCullingMode::CullClockwise,
             .. Default::default()
         };
 
