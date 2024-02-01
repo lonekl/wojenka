@@ -3,7 +3,7 @@
 use std::fs::File;
 use std::sync::Arc;
 use crate::image::color::Rgb8;
-use crate::image::Image;
+use crate::image::{Image, ImageDimensions};
 use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
@@ -99,8 +99,8 @@ impl Definitions {
 
 
             surface_types: SurfaceTypes::new(
-                vec!["game sets/historical/surface/grass".into()],
-                8
+                vec![("game sets/historical/surface/grass".into(), 1)],
+                ImageDimensions::new(24, 24),
             ).unwrap(),
 
 

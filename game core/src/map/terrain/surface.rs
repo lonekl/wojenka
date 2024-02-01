@@ -4,24 +4,23 @@ use crate::error::{CoreResult, OptionToCoreError, ResultToCoreError, CoreError};
 use crate::image::color::Rgb8;
 use crate::image::{ImageDimensions, Image, ImageResult};
 use crate::map::Map;
-use crate::map::units::TerrainPart;
 
 
 
 #[derive(Clone)]
 pub struct TileSurface {
 
-    part: TerrainPart,
+    type_id: usize,
     variant: usize,
 
 }
 
 impl TileSurface {
 
-    pub fn new(part: TerrainPart, variant: usize) -> Self {
+    pub fn new(type_id: usize, variant: usize) -> Self {
 
         Self {
-            part,
+            type_id,
             variant,
         }
     }
@@ -32,48 +31,35 @@ impl TileSurface {
 
 pub struct SurfaceTypes {
 
-    layers: Image<Rgb8>,
+    tile_image_dimensions: ImageDimensions,
     pub types: Vec<SurfaceType>,
-    texture_levels: u8,
 
 }
 
 impl SurfaceTypes {
 
-    pub fn new(directory_paths: Vec<PathBuf>, texture_levels: u8) -> CoreResult<Self> {
+    pub fn new(directory_paths: Vec<(PathBuf, usize)>, tile_dimensions: ImageDimensions) -> CoreResult<Self> {
         let mut types = vec![];
 
-        for directory_path in directory_paths {
-            types.push(SurfaceType::new(directory_path, 1)?);
+        for (directory_path, variant) in directory_paths {
+            types.push(SurfaceType::new(directory_path, variant)?);
         }
 
-        let layer_image_file = File::open("game sets/historical/surface/layers.png").to_core_error()?;
-        let layers = Image::load_png(layer_image_file).to_core_error()?;
-
         Ok(Self {
-            layers,
+            tile_image_dimensions: tile_dimensions,
             types,
-            texture_levels,
         })
     }
 
     pub fn build_surface_texture(&self, map: &Map) -> ImageResult<Image<Rgb8>> {
-        let layers = Image::new_uniform(Rgb8::new(0, 0, 0), ImageDimensions::new(24, 24));
-        let tile_dimensions = self.layers.dimensions();
-        let mut surface_texture = Image::new_uniform(Rgb8::new(255, 255, 255), map.image_dimensions(tile_dimensions));
+        let mut surface_texture = Image::new_uniform(Rgb8::new(255, 255, 255), map.image_dimensions(self.tile_image_dimensions));
 
         for (tile_index, tile) in (&map.tiles).iter().enumerate() {
             let tile_pos_tuple = map.index_to_xy(tile_index);
             let tile_pos = ImageDimensions::from_u32_tuple(tile_pos_tuple);
-            let image_tile_pos = tile_dimensions * tile_pos;
+            let image_tile_pos = self.tile_image_dimensions * tile_pos;
 
-            surface_texture.overdraw_shaped_image(
-                &self.types[0].variants[0],
-                image_tile_pos,
-                &layers,
-                Rgb8::new(0, 0, 0),
-            )?;
-
+            surface_texture.overdraw_image(&self.types[tile.surface.type_id].variants[tile.surface.variant], image_tile_pos)?;
         }
 
         Ok(surface_texture)

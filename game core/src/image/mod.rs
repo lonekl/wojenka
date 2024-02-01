@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io::Read;
 use std::ops::{Add, Mul};
 use png::{Decoder, DecodingError, OutputInfo};
@@ -19,7 +20,7 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
     pub fn new_raw(image: Vec<Color>, dimensions: ImageDimensions) -> ImageResult<Self> {
         if dimensions.len() != image.len() {
-            return Err(ImageError::DifferentDimensions);
+            return Err(ImageError::DimensionsDontMatch);
         }
 
         Ok(Self {
@@ -53,13 +54,36 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
 
 
-    pub fn overdraw_shaped_image<
+    pub fn overdraw_image<
+        Filler: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
+    >(&mut self, filler: &Image<Filler>, draw_offset: ImageDimensions) -> ImageResult<()> {
+        let self_filler_limit = filler.dimensions + draw_offset;
+        
+        if self_filler_limit > self.dimensions {
+            
+            return Err(ImageError::DimensionsDontMatch);
+        }
+
+        for filler_position in filler.dimensions {
+            let raw_filler_position = filler_position.index_on_bigger_image(filler.dimensions.x);
+            let self_position = filler_position + draw_offset;
+            let raw_self_position = self_position.index_on_bigger_image(self.dimensions.x);
+
+            filler.pixels[raw_filler_position].overdraw_on(&mut self.pixels[raw_self_position]);
+        }
+        
+        Ok(())
+    }
+
+
+
+    pub fn overdraw_with_shaped_image<
         Filler:     ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
         ShapeColor: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>,
     >(&mut self, filler: &Image<Filler>, draw_offset: ImageDimensions, shape: &Image<ShapeColor>, shape_color: ShapeColor) -> ImageResult<()> {
 
         if ! (filler.dimensions == shape.dimensions) {
-            return Err(ImageError::DifferentDimensions);
+            return Err(ImageError::DimensionsDontMatch);
         }
 
         for filler_position in filler.dimensions {
@@ -216,6 +240,33 @@ impl Mul<ImageDimensions> for ImageDimensions {
     }
 }
 
+/// Works in slightly other way, than you would expect.
+impl PartialOrd for ImageDimensions {
+    fn partial_cmp(&self, _other: &Self) -> Option<Ordering> {
+        None
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+
+        self.x < other.x || self.y < other.y
+    }
+
+    fn le(&self, other: &Self) -> bool {
+
+        self.x <= other.x || self.y <= other.y
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+
+        self.x > other.x || self.y > other.y
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+
+        self.x >= other.x || self.y >= other.y
+    }
+}
+
 
 
 pub trait ToImageResult<T> {
@@ -239,6 +290,6 @@ pub type ImageResult<T> = Result<T, ImageError>;
 pub enum ImageError {
 
     PngLoad(DecodingError),
-    DifferentDimensions,
+    DimensionsDontMatch,
 
 }

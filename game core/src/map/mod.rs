@@ -45,9 +45,7 @@ impl Map {
                 let mut result = vec![
                     Tile::new(
                         3,
-                        vec![
-                            TileSurface::new(TerrainPart::from_8bit_scale(255), 0)
-                        ]
+                        TileSurface::new(0, 0)
                     );
                     tile_amount
                 ];
@@ -157,7 +155,7 @@ pub struct Tile {
     pub height: TerrainHeight,
     pub height_variation: HeightVariation,
 
-    pub surface: Vec<TileSurface>,
+    pub surface: TileSurface,
 
     /// What power is owner of that terrain.
     owner: usize,
@@ -166,7 +164,7 @@ pub struct Tile {
 
 impl Tile {
 
-    pub fn new(owner: usize, surface: Vec<TileSurface>) -> Self {
+    pub fn new(owner: usize, surface: TileSurface) -> Self {
 
         Self {
             height: TerrainHeight::from_meters(10),
