@@ -45,20 +45,30 @@ impl Map {
             shape,
             tile_size,
             tiles: {
-                let mut result = vec![
+                let mut tiles = vec![
                     Tile::new(
                         3,
-                        TileSurface::new(0, 2),
+                        TileSurface::new(0, 1),
                     );
                     tile_amount
                 ];
 
-                result[25].height = TerrainHeight::from_meters(3000);
-                result[35].height = TerrainHeight::from_meters(7500);
+                for tile_y in 0..30 {
+                    for tile_x in 0..30 {
+                        let tile_index = tile_y as usize * 30 + tile_x as usize;
+                        let mut center_distance = tile_x + tile_y - 30;
+                        if center_distance < 0 {center_distance = -center_distance}
 
-                result[11].height = TerrainHeight::from_meters(-10000);
+                        if center_distance < 6 {
+                            let mut height = ((6 - center_distance) * 3);
+                            height *= height;
+                            tiles[tile_index].height += TerrainHeight::from_meters(height);
+                        }
 
-                result
+                    }
+                }
+
+                tiles
             },
             tile_sectors,
         }

@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign, Sub, SubAssign};
+
 #[derive(Clone, Copy)]
 pub struct TerrainPart ( u16);
 
@@ -53,6 +55,36 @@ impl TerrainHeight {
         self.0 as f32 / scale.0 as f32
     }
 
+}
+
+impl Add<TerrainHeight> for TerrainHeight {
+    type Output = TerrainHeight;
+
+    fn add(self, rhs: TerrainHeight) -> Self::Output {
+
+        Self (self.0 + rhs.0)
+    }
+}
+
+impl AddAssign<TerrainHeight> for TerrainHeight {
+    fn add_assign(&mut self, rhs: TerrainHeight) {
+        self.0 += rhs.0;
+    }
+}
+
+impl Sub<TerrainHeight> for TerrainHeight {
+    type Output = TerrainHeight;
+
+    fn sub(self, rhs: TerrainHeight) -> Self::Output {
+
+        Self (self.0 - rhs.0)
+    }
+}
+
+impl SubAssign<TerrainHeight> for TerrainHeight {
+    fn sub_assign(&mut self, rhs: TerrainHeight) {
+        self.0 -= rhs.0;
+    }
 }
 
 

@@ -51,7 +51,7 @@ impl Game {
 
             world_time,
 
-            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 10, height: 10}, TerrainHeight::from_meters(10_000), world_time),
+            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 30, height: 30}, TerrainHeight::from_meters(10_000), world_time),
         }
     }
 
@@ -100,7 +100,10 @@ impl Definitions {
 
 
             surface_types: SurfaceTypes::new(
-                vec![("game sets/historical/surface/grass".into(), 4)],
+                vec![
+                    ("game sets/historical/surface/grass".into(), 4),
+                    ("game sets/historical/surface/dessert".into(), 1),
+                ],
                 ImageDimensions::new(64, 64),
             ).unwrap(),
 
