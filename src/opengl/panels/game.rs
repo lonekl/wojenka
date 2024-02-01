@@ -114,8 +114,11 @@ uniform mat3 rotation;
 uniform vec3 camera_position;
 
 out vec2 v_surface_uv;
+out float v_sun_light;
 
 void main() {
+
+    v_sun_light = position.z / camera_position.z + 0.5;
 
     gl_Position = projection * vec4(rotation * (position - camera_position), 1.0);
 
@@ -129,6 +132,7 @@ const FRAGMENT_SHADER: &'static str = r#"
 #version 150
 
 in vec2 v_surface_uv;
+in float v_sun_light;
 
 uniform sampler2D map_texture;
 
@@ -136,11 +140,11 @@ out vec4 color;
 
 void main() {
 
-    color = vec4(v_surface_uv.x, 1.0, v_surface_uv.y, 1.0);
     color = texture(
         map_texture,
         v_surface_uv
     );
+    color.xyz *= v_sun_light;
 
 }
 
