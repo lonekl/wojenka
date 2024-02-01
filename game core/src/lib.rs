@@ -100,8 +100,8 @@ impl Definitions {
 
 
             surface_types: SurfaceTypes::new(
-                vec![("game sets/historical/surface/grass".into(), 1)],
-                ImageDimensions::new(24, 24),
+                vec![("game sets/historical/surface/grass".into(), 4)],
+                ImageDimensions::new(64, 64),
             ).unwrap(),
 
 

@@ -48,7 +48,7 @@ impl Map {
                 let mut result = vec![
                     Tile::new(
                         3,
-                        TileSurface::new(0, 0)
+                        TileSurface::new(0, 2),
                     );
                     tile_amount
                 ];
