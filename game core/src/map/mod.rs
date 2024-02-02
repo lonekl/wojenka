@@ -56,13 +56,27 @@ impl Map {
                 for tile_y in 0..30 {
                     for tile_x in 0..30 {
                         let tile_index = tile_y as usize * 30 + tile_x as usize;
-                        let mut center_distance = tile_x + tile_y - 30;
-                        if center_distance < 0 {center_distance = -center_distance}
 
-                        if center_distance < 6 {
-                            let mut height = ((6 - center_distance) * 3);
+                        let from_center_distance = (tile_x - 15).max(15 - tile_x) + (tile_y - 15).max(15 - tile_y);
+                        let from_first_mountain_pass_distance = (tile_x - 12).max(12 - tile_x) + (tile_y - 12).max(12 - tile_y);
+                        let from_second_mountain_pass_distance = (tile_x - 11).max(11 - tile_x) + (tile_y - 10).max(10 - tile_y);
+                        let from_second_mountain_distance = (tile_x - 8).max(8 - tile_x) + (tile_y - 6).max(6 - tile_y);
+
+                        let from_mountain_distance = from_center_distance
+                            .min(from_second_mountain_distance)
+                            .min(from_first_mountain_pass_distance + 2)
+                            .min(from_second_mountain_pass_distance + 2);
+
+                        eprintln!("Tile x: {tile_x}, Tile y: {tile_y}:");
+                        eprintln!("\tfrom center distance: {from_center_distance},");
+                        eprintln!("\tfrom mountain pass distance: {from_first_mountain_pass_distance},");
+                        eprintln!("\tfrom second mountain distance: {from_second_mountain_distance}.");
+
+                        if from_mountain_distance < 6 {
+                            let mut height = (6 - from_mountain_distance) * 10;
                             height *= height;
                             tiles[tile_index].height += TerrainHeight::from_meters(height);
+                            tiles[tile_index].surface = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
                         }
 
                     }

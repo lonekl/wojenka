@@ -1,9 +1,7 @@
 #![feature(generic_const_exprs)]
 
-use std::fs::File;
 use std::sync::Arc;
-use crate::image::color::Rgb8;
-use crate::image::{Image, ImageDimensions};
+use crate::image::ImageDimensions;
 use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
 use crate::map::{Map, MapShape};
@@ -51,7 +49,7 @@ impl Game {
 
             world_time,
 
-            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 30, height: 30}, TerrainHeight::from_meters(10_000), world_time),
+            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 30, height: 30}, TerrainHeight::from_meters(1_000), world_time),
         }
     }
 
@@ -101,8 +99,9 @@ impl Definitions {
 
             surface_types: SurfaceTypes::new(
                 vec![
-                    ("game sets/historical/surface/grass".into(), 4),
+                    ("game sets/historical/surface/plains".into(), 4),
                     ("game sets/historical/surface/dessert".into(), 1),
+                    ("game sets/historical/surface/mountains".into(), 3),
                 ],
                 ImageDimensions::new(64, 64),
             ).unwrap(),

@@ -88,9 +88,9 @@ fn create_tile_square(
     let central_x_uv = (tile_x + 0.5) * x_uv_scale + 0.5;
     let pos_x_uv = (tile_x + 1.0) * x_uv_scale + 0.5;
 
-    let neg_y_uv = -tile_y * y_uv_scale + 0.5;
-    let central_y_uv = -(tile_y + 0.5) * y_uv_scale + 0.5;
-    let pos_y_uv = -(tile_y + 1.0) * y_uv_scale + 0.5;
+    let neg_y_uv = tile_y * y_uv_scale + 0.5;
+    let central_y_uv = (tile_y + 0.5) * y_uv_scale + 0.5;
+    let pos_y_uv = (tile_y + 1.0) * y_uv_scale + 0.5;
 
     let west_central_height = (west_height + central_height) / 2.0;
     let east_central_height = (east_height + central_height) / 2.0;
