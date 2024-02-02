@@ -57,6 +57,13 @@ impl Map {
                     for tile_x in 0..30 {
                         let tile_index = tile_y as usize * 30 + tile_x as usize;
 
+                        let east_dessert = (tile_y - 17).max(17 - tile_y)
+                            + 10 - tile_x / 3;
+
+                        if east_dessert < 7 {
+                            tiles[tile_index].surface = TileSurface::new(1, 0);
+                        }
+
                         let from_center_distance = (tile_x - 15).max(15 - tile_x) + (tile_y - 15).max(15 - tile_y);
                         let from_first_mountain_pass_distance = (tile_x - 12).max(12 - tile_x) + (tile_y - 12).max(12 - tile_y);
                         let from_second_mountain_pass_distance = (tile_x - 11).max(11 - tile_x) + (tile_y - 10).max(10 - tile_y);
@@ -66,11 +73,6 @@ impl Map {
                             .min(from_second_mountain_distance)
                             .min(from_first_mountain_pass_distance + 2)
                             .min(from_second_mountain_pass_distance + 2);
-
-                        eprintln!("Tile x: {tile_x}, Tile y: {tile_y}:");
-                        eprintln!("\tfrom center distance: {from_center_distance},");
-                        eprintln!("\tfrom mountain pass distance: {from_first_mountain_pass_distance},");
-                        eprintln!("\tfrom second mountain distance: {from_second_mountain_distance}.");
 
                         if from_mountain_distance < 6 {
                             let mut height = (6 - from_mountain_distance) * 10;
