@@ -1,12 +1,13 @@
 use std::fs::File;
 use std::path::PathBuf;
 use crate::error::{CoreResult, OptionToCoreError, ResultToCoreError, CoreError};
-use crate::image::color::Rgb8;
+use crate::image::color::{Rgb8, Rgba8};
 use crate::image::{ImageDimensions, Image, ImageResult};
 use crate::map::Map;
 
 
 
+/// Must be array of these. At length of layer number.
 #[derive(Clone)]
 pub struct TileSurface {
 
@@ -32,22 +33,22 @@ impl TileSurface {
 pub struct SurfaceTypes {
 
     tile_image_dimensions: ImageDimensions,
-    pub types: Vec<SurfaceType>,
+    pub layers: Vec<SurfaceTypeLayer>,
 
 }
 
 impl SurfaceTypes {
 
-    pub fn new(directory_paths: Vec<(PathBuf, usize)>, tile_dimensions: ImageDimensions) -> CoreResult<Self> {
-        let mut types = vec![];
+    pub fn new(directory_paths: Vec<Vec<(PathBuf, usize)>>, tile_dimensions: ImageDimensions) -> CoreResult<Self> {
+        let mut layers = vec![];
 
-        for (directory_path, variant) in directory_paths {
-            types.push(SurfaceType::new(directory_path, variant)?);
+        for lower_directory_path in directory_paths {
+            layers.push(SurfaceTypeLayer::new(lower_directory_path)?);
         }
 
         Ok(Self {
             tile_image_dimensions: tile_dimensions,
-            types,
+            layers,
         })
     }
 
@@ -55,11 +56,13 @@ impl SurfaceTypes {
         let mut surface_texture = Image::new_uniform(Rgb8::new(255, 255, 255), map.image_dimensions(self.tile_image_dimensions));
 
         for (tile_index, tile) in (&map.tiles).iter().enumerate() {
-            let tile_pos_tuple = map.index_to_xy(tile_index);
+            let tile_pos_tuple = map.properties.shape.coordinates(tile_index);
             let tile_pos = ImageDimensions::from_u32_tuple(tile_pos_tuple);
             let image_tile_pos = self.tile_image_dimensions * tile_pos;
 
-            surface_texture.overdraw_image(&self.types[tile.surface.type_id].variants[tile.surface.variant], image_tile_pos)?;
+            for layer in &self.layers {
+                surface_texture.overdraw_image(&layer.types[tile.surface.type_id].variants[tile.surface.variant], image_tile_pos)?;
+            }
         }
 
         Ok(surface_texture)
@@ -69,10 +72,34 @@ impl SurfaceTypes {
 
 
 
+pub struct SurfaceTypeLayer {
+
+    types: Vec<SurfaceType>,
+
+}
+
+impl SurfaceTypeLayer {
+
+    pub fn new(directory_paths: Vec<(PathBuf, usize)>) -> CoreResult<Self> {
+        let mut types = vec![];
+
+        for (directory_path, variant) in directory_paths {
+            types.push(SurfaceType::new(directory_path, variant)?);
+        }
+
+        Ok(Self {
+            types,
+        })
+    }
+
+}
+
+
+
 pub struct SurfaceType {
 
     name_id: String,
-    variants: Vec<Image<Rgb8>>,
+    variants: Vec<Image<Rgba8>>,
 
 }
 

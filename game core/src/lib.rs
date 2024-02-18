@@ -4,9 +4,9 @@ use std::sync::Arc;
 use crate::image::ImageDimensions;
 use crate::items::{ItemType, ItemTypeValues};
 use crate::items::units::{AmountType, Calories, CaloriesRate, Weight};
-use crate::map::{Map, MapShape};
-use crate::map::terrain::sectors::TileSectorType;
-use crate::map::terrain::surface::{SurfaceTypes};
+use crate::map::{Map, MapSettings, MapShape};
+use crate::map::tile::sectors::TileSectorType;
+use crate::map::tile::surface::{SurfaceTypes};
 use crate::map::units::TerrainHeight;
 use crate::powers::Power;
 use crate::units::Time;
@@ -49,7 +49,13 @@ impl Game {
 
             world_time,
 
-            map: Map::new(definitions.clone(), MapShape::Rectangular { width: 30, height: 30}, TerrainHeight::from_meters(1_000), world_time),
+            map: Map::new(
+                definitions.clone(),
+                MapSettings::new(
+                    TerrainHeight::from_meters(1_000),
+                    MapShape::Rectangular { width: 30, height: 30}),
+                world_time
+            ),
         }
     }
 
@@ -99,9 +105,11 @@ impl Definitions {
 
             surface_types: SurfaceTypes::new(
                 vec![
-                    ("game sets/historical/surface/plains".into(), 4),
-                    ("game sets/historical/surface/dessert".into(), 1),
-                    ("game sets/historical/surface/mountains".into(), 3),
+                    vec![
+                        ("game sets/historical/surface/plains".into(), 4),
+                        ("game sets/historical/surface/dessert".into(), 1),
+                        ("game sets/historical/surface/mountains".into(), 3),
+                    ]
                 ],
                 ImageDimensions::new(64, 64),
             ).unwrap(),

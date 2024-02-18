@@ -30,6 +30,8 @@ impl TerrainPart {
 pub struct TerrainHeight ( i32);
 
 impl TerrainHeight {
+    
+    pub const ZERO: Self = Self ( 0);
 
     pub fn from_meters(altitude: i32) -> Self {
 

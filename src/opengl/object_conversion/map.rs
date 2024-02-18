@@ -1,13 +1,12 @@
-use war_economy_core::map::{MapShape, Tile};
-use war_economy_core::map::units::TerrainHeight;
+use war_economy_core::map::{MapSettings, MapShape, Tile};
 use crate::opengl::triangles::MapVertex;
 
-pub fn map_tiles_to_vertexes(terrain: (MapShape, TerrainHeight, &Vec<Tile>)) -> Vec<MapVertex> {
-    let (map_shape, tile_size, tiles) = terrain;
+pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &Vec<Tile>)) -> Vec<MapVertex> {
+    let (map_settings, tiles) = terrain;
 
     let mut vertex_groups = vec![];
 
-    match map_shape {
+    match map_settings.shape {
         MapShape::Rectangular { width, height } => {
             let width_usize = width as usize;
             //let height_usize = height as usize;
@@ -42,15 +41,15 @@ pub fn map_tiles_to_vertexes(terrain: (MapShape, TerrainHeight, &Vec<Tile>)) -> 
                     y_uv_scale,
                     tile_display_x,
                     tile_display_y,
-                    central_tile.height.to_f32_rescaled(tile_size),
-                    west_tile.height.to_f32_rescaled(tile_size),
-                    east_tile.height.to_f32_rescaled(tile_size),
-                    north_tile.height.to_f32_rescaled(tile_size),
-                    south_tile.height.to_f32_rescaled(tile_size),
-                    south_west_tile.height.to_f32_rescaled(tile_size),
-                    south_east_tile.height.to_f32_rescaled(tile_size),
-                    north_west_tile.height.to_f32_rescaled(tile_size),
-                    north_east_tile.height.to_f32_rescaled(tile_size),
+                    central_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    west_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    east_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    north_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    south_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    south_west_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    south_east_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    north_west_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    north_east_tile.height.to_f32_rescaled(map_settings.tile_size),
                 ));
 
             }

@@ -115,9 +115,9 @@ impl ColorFn for Rgba8 {
 impl Overdraw<Rgb8> for Rgba8 {
     fn overdraw_on(&self, rhs: &mut Rgb8) {
 
-        rhs.r = ((self.r as i16  -  rhs.r as i16)  *  self.a as i16  /  0xff  +  rhs.r as i16) as u8;
-        rhs.g = ((self.g as i16  -  rhs.g as i16)  *  self.a as i16  /  0xff  +  rhs.g as i16) as u8;
-        rhs.b = ((self.b as i16  -  rhs.b as i16)  *  self.a as i16  /  0xff  +  rhs.b as i16) as u8;
+        rhs.r = ((self.r as i32  -  rhs.r as i32)  *  self.a as i32  /  0xff  +  rhs.r as i32) as u8;
+        rhs.g = ((self.g as i32  -  rhs.g as i32)  *  self.a as i32  /  0xff  +  rhs.g as i32) as u8;
+        rhs.b = ((self.b as i32  -  rhs.b as i32)  *  self.a as i32  /  0xff  +  rhs.b as i32) as u8;
 
     }
 }
@@ -125,9 +125,9 @@ impl Overdraw<Rgb8> for Rgba8 {
 impl Overdraw<Rgba8> for Rgba8 {
     fn overdraw_on(&self, rhs: &mut Rgba8) {
 
-        rhs.r = ((self.r as i16  -  rhs.r as i16)  *  self.a as i16  /  0xff  +  rhs.r as i16) as u8;
-        rhs.g = ((self.g as i16  -  rhs.g as i16)  *  self.a as i16  /  0xff  +  rhs.g as i16) as u8;
-        rhs.b = ((self.b as i16  -  rhs.b as i16)  *  self.a as i16  /  0xff  +  rhs.b as i16) as u8;
+        rhs.r = ((self.r as i32  -  rhs.r as i32)  *  self.a as i32  /  0xff  +  rhs.r as i32) as u8;
+        rhs.g = ((self.g as i32  -  rhs.g as i32)  *  self.a as i32  /  0xff  +  rhs.g as i32) as u8;
+        rhs.b = ((self.b as i32  -  rhs.b as i32)  *  self.a as i32  /  0xff  +  rhs.b as i32) as u8;
         rhs.a = self.a.checked_add(self.a).unwrap_or(u8::MAX);
     }
 }
