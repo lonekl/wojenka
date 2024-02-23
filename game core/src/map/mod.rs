@@ -6,6 +6,7 @@ use crate::map::units::{HeightVariation, TerrainHeight};
 use crate::units::Time;
 use crate::Definitions;
 use crate::image::ImageDimensions;
+use crate::map::tile::TileArray;
 use crate::map::tile::surface::TileSurface;
 
 
@@ -13,7 +14,7 @@ pub struct Map {
 
     pub properties: MapSettings,
 
-    tiles: Vec<Tile>,
+    tiles: TileArray,
     //tile_sectors: Vec<SectorTiles>,
 
 }
