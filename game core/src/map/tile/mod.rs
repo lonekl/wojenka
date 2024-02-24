@@ -71,8 +71,6 @@ impl TileArray {
 
         if byte_index < self.byte_array.len() {
             let result = unsafe { TileLink {
-                // I think, it's safe, so it is.
-                #[allow(mutable_transmutes)]
                 main: transmute(&self.byte_array[byte_index]),
                 surface: transmute((&self.byte_array[size_of::<TileSizedData>() + byte_index], self.definitions.surface_types.layers.len())),
             }};
@@ -162,14 +160,23 @@ impl TileLocal {
 
 
 
+#[derive(Clone, Copy)]
 pub struct TileLink<'a> {
 
-    pub main: &'a mut TileSizedData,
-    pub surface: &'a mut [TileSurface],
+    pub main: &'a TileSizedData,
+    pub surface: &'a [TileSurface],
 
 }
 
 impl<'a> TileLink<'a> {
+
+    pub fn clone_data(&self) -> TileLocal {
+
+        TileLocal {
+            main: self.main.clone(),
+            surface: self.surface.to_vec().into_boxed_slice(),
+        }
+    }
 
 }
 

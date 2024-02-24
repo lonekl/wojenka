@@ -21,7 +21,7 @@ pub struct Map {
 
 impl Map {
 
-    pub fn new(definitions: Arc<Definitions>, properties: MapSettings, start_time: Time) -> Self {
+    pub fn new(definitions: Arc<Definitions>, properties: MapSettings, _start_time: Time) -> Self {
         let tile_amount = properties.shape.tile_amount() as usize;
         let mut tiles = vec![
             Tile::new(
@@ -52,14 +52,14 @@ impl Map {
 
         for tile_y in 0..30 {
             for tile_x in 0..30 {
-                let tile_index = tile_y * 30 + tile_x;
-                let tile_link = tile_array.index(tile_index);
+                let tile_index = (tile_y * 30 + tile_x) as u32;
+                let mut result_tile = tile_array.index(tile_index).clone_data();
 
                 let east_dessert = (tile_y - 17).max(17 - tile_y)
                     + 10 - tile_x / 3;
 
                 if east_dessert < 7 {
-                    tile_link.surface[0] = TileSurface::new(1, 0);
+                    result_tile.surface[0] = TileSurface::new(1, 0);
                 }
 
                 let from_center_distance = (tile_x - 15).max(15 - tile_x) + (tile_y - 15).max(15 - tile_y);
@@ -75,10 +75,11 @@ impl Map {
                 if from_mountain_distance < 6 {
                     let mut height = (6 - from_mountain_distance) * 10;
                     height *= height;
-                    tile_link.main.height += TerrainHeight::from_meters(height as i32);
-                    tile_link.surface[0] = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
+                    result_tile.main.height += TerrainHeight::from_meters(height as i32);
+                    result_tile.surface[0] = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
                 }
 
+                let _ = tile_array.put(tile_index, result_tile);
             }
         }
 

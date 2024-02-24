@@ -9,7 +9,6 @@ pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &TileArray)) -> Vec<MapVert
 
     match map_settings.shape {
         MapShape::Rectangular { width, height } => {
-            let width_usize = width as usize;
             //let height_usize = height as usize;
             let x_offset = width as f32 / -2.0;
             let y_offset = height as f32 / -2.0;
@@ -18,23 +17,24 @@ pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &TileArray)) -> Vec<MapVert
             let y_uv_scale = 1.0 / height as f32;
 
 
-            for (tile_index, central_tile) in tiles.into_iter().enumerate() {
-                let tile_y = tile_index / width_usize;
-                let tile_x = tile_index % width_usize;
+            for (tile_index_usize, central_tile) in tiles.into_iter().enumerate() {
+                let tile_index = tile_index_usize as u32;
+                let tile_y = tile_index / width;
+                let tile_x = tile_index % width;
 
                 let tile_display_y = tile_y as f32 + y_offset;
                 let tile_display_x = tile_x as f32 + x_offset;
 
-                let west_tile = if tile_index == 0 {central_tile} else {&tiles.index(tile_index - 1)};
+                let west_tile = if tile_index == 0 {central_tile} else {tiles.index(tile_index - 1)};
                 let east_tile = tiles.get(tile_index + 1).unwrap_or(central_tile);
-                let south_tile = if tile_index <= width_usize {central_tile} else {&tiles[tile_index - width_usize]};
-                let north_tile = tiles.get(tile_index + width_usize).unwrap_or(central_tile);
+                let south_tile = if tile_index <= width {central_tile} else {tiles.index(tile_index - width)};
+                let north_tile = tiles.get(tile_index + width).unwrap_or(central_tile);
 
-                let south_west_tile = if tile_index < width_usize + 1 {central_tile} else {&tiles[tile_index - width_usize - 1]};
-                let south_east_tile = if tile_index <= width_usize {central_tile} else {&tiles[tile_index - width_usize + 1]};
+                let south_west_tile = if tile_index < width + 1 {central_tile} else {tiles.index(tile_index - width - 1)};
+                let south_east_tile = if tile_index <= width {central_tile} else {tiles.index(tile_index - width + 1)};
 
-                let north_west_tile = tiles.get(tile_index + width_usize - 1).unwrap_or(central_tile);
-                let north_east_tile = tiles.get(tile_index + width_usize + 1).unwrap_or(central_tile);
+                let north_west_tile = tiles.get(tile_index + width - 1).unwrap_or(central_tile);
+                let north_east_tile = tiles.get(tile_index + width + 1).unwrap_or(central_tile);
 
 
                 vertex_groups.push(create_tile_square(
@@ -42,15 +42,15 @@ pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &TileArray)) -> Vec<MapVert
                     y_uv_scale,
                     tile_display_x,
                     tile_display_y,
-                    central_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    west_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    east_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    north_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    south_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    south_west_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    south_east_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    north_west_tile.height.to_f32_rescaled(map_settings.tile_size),
-                    north_east_tile.height.to_f32_rescaled(map_settings.tile_size),
+                    central_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    west_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    east_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    north_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    south_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    south_west_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    south_east_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    north_west_tile.main.height.to_f32_rescaled(map_settings.tile_size),
+                    north_east_tile.main.height.to_f32_rescaled(map_settings.tile_size),
                 ));
 
             }
