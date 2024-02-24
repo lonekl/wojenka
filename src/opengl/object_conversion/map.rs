@@ -1,4 +1,4 @@
-use war_economy_core::map::{MapSettings, MapShape, Tile};
+use war_economy_core::map::{MapSettings, MapShape};
 use war_economy_core::map::tile::TileArray;
 use crate::opengl::triangles::MapVertex;
 

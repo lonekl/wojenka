@@ -1,9 +1,7 @@
-use std::cell::UnsafeCell;
 use std::mem::{size_of, transmute};
-use std::ops::Index;
 use std::sync::Arc;
 use crate::Definitions;
-use crate::map::tile::surface::{SurfaceType, TileSurface};
+use crate::map::tile::surface::{TileSurface};
 use crate::map::units::TerrainHeight;
 
 pub mod sectors;
@@ -49,15 +47,7 @@ impl TileArray {
         }
 
         unsafe {
-            (&mut self.byte_array[self.byte_index(index)] as * mut u8 as * mut TileSizedData).write(new_tile.main);
-
-            for (surface_index, new_surface) in new_tile.surface.iter().enumerate() {
-                (&mut self.byte_array[
-                    self.byte_index(index)
-                        + surface_index * size_of::<TileSurface>()
-                        + size_of::<TileSizedData>()
-                    ] as * mut u8 as * mut TileSurface).write(new_surface.clone());
-            }
+            new_tile.write_memory(&mut self.byte_array[self.byte_index(index)] as *mut u8);
         }
 
         Ok(())
@@ -156,6 +146,24 @@ impl TileLocal {
         }
     }
 
+
+
+    pub unsafe fn write_memory<P>(&self, pointer: * mut P) {
+
+        (pointer as * mut TileSizedData).write(self.main.clone());
+
+        for (surface_index, new_surface) in self.surface.iter().enumerate() {
+            (
+                (
+                    pointer as usize
+                        + surface_index * size_of::<TileSurface>()
+                        + size_of::<TileSizedData>()
+                ) as * mut TileSurface
+            ).write(new_surface.clone());
+        }
+
+    }
+
 }
 
 
@@ -170,7 +178,7 @@ pub struct TileLink<'a> {
 
 impl<'a> TileLink<'a> {
 
-    pub fn clone_data(&self) -> TileLocal {
+    pub fn to_local(&self) -> TileLocal {
 
         TileLocal {
             main: self.main.clone(),

@@ -2,7 +2,7 @@ pub mod tile;
 pub mod units;
 
 use std::sync::Arc;
-use crate::map::units::{HeightVariation, TerrainHeight};
+use crate::map::units::{TerrainHeight};
 use crate::units::Time;
 use crate::Definitions;
 use crate::image::ImageDimensions;
@@ -10,12 +10,13 @@ use crate::map::tile::{TileArray, TileLocal};
 use crate::map::tile::surface::TileSurface;
 
 
+
 pub struct Map {
 
+    definitions: Arc<Definitions>,
     pub properties: MapSettings,
 
     tiles: TileArray,
-    //tile_sectors: Vec<SectorTiles>,
 
 }
 
@@ -23,37 +24,16 @@ impl Map {
 
     pub fn new(definitions: Arc<Definitions>, properties: MapSettings, _start_time: Time) -> Self {
         let tile_amount = properties.shape.tile_amount() as usize;
-        let mut tiles = vec![
-            Tile::new(
-                3,
-                TileSurface::new(0, 1),
-            );
-            tile_amount
-        ];
         let mut tile_array = TileArray::new(
             definitions.clone(),
             TileLocal::new(3, Box::new([TileSurface::new(0, 0)])),
             tile_amount as u32
         );
-        /*let mut tile_sectors = vec![];
-
-        for tile_sector_type in &definitions.tile_sector_types {
-            let last_rewards = tile_sector_type.last_rewards(start_time);
-
-            let sector_tile = TileSector::new(Population::new(1000));
-            let sector_tiles = vec![sector_tile; tile_amount];
-
-            tile_sectors.push(SectorTiles {
-                last_rewards,
-                tiles: sector_tiles,
-            });
-
-        }*/
 
         for tile_y in 0..30 {
             for tile_x in 0..30 {
                 let tile_index = (tile_y * 30 + tile_x) as u32;
-                let mut result_tile = tile_array.index(tile_index).clone_data();
+                let mut result_tile = tile_array.index(tile_index).to_local();
 
                 let east_dessert = (tile_y - 17).max(17 - tile_y)
                     + 10 - tile_x / 3;
@@ -75,7 +55,7 @@ impl Map {
                 if from_mountain_distance < 6 {
                     let mut height = (6 - from_mountain_distance) * 10;
                     height *= height;
-                    result_tile.main.height += TerrainHeight::from_meters(height as i32);
+                    result_tile.main.height += TerrainHeight::from_meters(height);
                     result_tile.surface[0] = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
                 }
 
@@ -84,6 +64,7 @@ impl Map {
         }
 
         Self {
+            definitions,
             properties,
             tiles: tile_array,
             //tile_sectors,
@@ -92,7 +73,7 @@ impl Map {
 
 
 
-    pub fn tick(&mut self, definitions: &Arc<Definitions>, tick_length: Time) {
+    pub fn tick(&mut self, _tick_length: Time) {
 
         /*for (sector_type_index, sector_tiles) in self.tile_sectors.iter_mut().enumerate() {
 
@@ -108,47 +89,14 @@ impl Map {
 
 
 
-    pub fn image_dimensions(&self, tile_dimensions: ImageDimensions) -> ImageDimensions {
+    pub fn image_dimensions(&self, tile_image_dimensions: ImageDimensions) -> ImageDimensions {
 
-        match self.properties.shape {
-            MapShape::Rectangular { width, height } => tile_dimensions * ImageDimensions::new(width as usize, height as usize),
-        }
+        tile_image_dimensions * ImageDimensions::from_u32_tuple(self.properties.shape.max_axis())
     }
 
     pub fn get_terrain(&self) -> (&MapSettings, &TileArray) {
 
         (&self.properties, &self.tiles)
-    }
-
-}
-
-
-
-#[derive(Clone)]
-pub struct Tile {
-
-    pub height: TerrainHeight,
-    pub height_variation: HeightVariation,
-
-    pub surface: TileSurface,
-
-    /// What power is owner of that tile.
-    owner: usize,
-
-}
-
-impl Tile {
-
-    pub fn new(owner: usize, surface: TileSurface) -> Self {
-
-        Self {
-            height: TerrainHeight::from_meters(10),
-            height_variation: HeightVariation::from_meters(3),
-
-            surface,
-
-            owner,
-        }
     }
 
 }
@@ -211,13 +159,6 @@ pub enum MapShape {
 
 impl MapShape {
 
-    pub fn tile_amount(&self) -> u32 {
-
-        match self {
-            MapShape::Rectangular { width, height } => width * height,
-        }
-    }
-
     pub fn raw_index(&self, x: u32, y: u32) -> usize {
 
         match self {
@@ -230,6 +171,22 @@ impl MapShape {
 
         match self {
             MapShape::Rectangular { width, .. } => (u32_index % width, u32_index / width),
+        }
+    }
+
+
+
+    pub fn tile_amount(&self) -> u32 {
+
+        match self {
+            MapShape::Rectangular { width, height } => width * height,
+        }
+    }
+
+    pub fn max_axis(&self) -> (u32, u32) {
+
+        match self {
+            MapShape::Rectangular { width, height } => (*width, *height),
         }
     }
 
