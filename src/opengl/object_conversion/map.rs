@@ -1,7 +1,8 @@
 use war_economy_core::map::{MapSettings, MapShape, Tile};
+use war_economy_core::map::tile::TileArray;
 use crate::opengl::triangles::MapVertex;
 
-pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &Vec<Tile>)) -> Vec<MapVertex> {
+pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &TileArray)) -> Vec<MapVertex> {
     let (map_settings, tiles) = terrain;
 
     let mut vertex_groups = vec![];
@@ -17,14 +18,14 @@ pub fn map_tiles_to_vertexes(terrain: (&MapSettings, &Vec<Tile>)) -> Vec<MapVert
             let y_uv_scale = 1.0 / height as f32;
 
 
-            for (tile_index, central_tile) in tiles.iter().enumerate() {
+            for (tile_index, central_tile) in tiles.into_iter().enumerate() {
                 let tile_y = tile_index / width_usize;
                 let tile_x = tile_index % width_usize;
 
                 let tile_display_y = tile_y as f32 + y_offset;
                 let tile_display_x = tile_x as f32 + x_offset;
 
-                let west_tile = if tile_index == 0 {central_tile} else {&tiles[tile_index - 1]};
+                let west_tile = if tile_index == 0 {central_tile} else {&tiles.index(tile_index - 1)};
                 let east_tile = tiles.get(tile_index + 1).unwrap_or(central_tile);
                 let south_tile = if tile_index <= width_usize {central_tile} else {&tiles[tile_index - width_usize]};
                 let north_tile = tiles.get(tile_index + width_usize).unwrap_or(central_tile);

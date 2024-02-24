@@ -55,13 +55,13 @@ impl SurfaceTypes {
     pub fn build_surface_texture(&self, map: &Map) -> ImageResult<Image<Rgb8>> {
         let mut surface_texture = Image::new_uniform(Rgb8::new(255, 255, 255), map.image_dimensions(self.tile_image_dimensions));
 
-        for (tile_index, tile) in (&map.tiles).iter().enumerate() {
+        for (tile_index, tile) in (&map.tiles).into_iter().enumerate() {
             let tile_pos_tuple = map.properties.shape.coordinates(tile_index);
             let tile_pos = ImageDimensions::from_u32_tuple(tile_pos_tuple);
             let image_tile_pos = self.tile_image_dimensions * tile_pos;
 
             for layer in &self.layers {
-                surface_texture.overdraw_image(&layer.types[tile.surface.type_id].variants[tile.surface.variant], image_tile_pos)?;
+                surface_texture.overdraw_image(&layer.types[tile.surface[0].type_id].variants[tile.surface[0].variant], image_tile_pos)?;
             }
         }
 

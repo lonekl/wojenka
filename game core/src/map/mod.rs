@@ -6,7 +6,7 @@ use crate::map::units::{HeightVariation, TerrainHeight};
 use crate::units::Time;
 use crate::Definitions;
 use crate::image::ImageDimensions;
-use crate::map::tile::TileArray;
+use crate::map::tile::{TileArray, TileLocal};
 use crate::map::tile::surface::TileSurface;
 
 
@@ -30,6 +30,11 @@ impl Map {
             );
             tile_amount
         ];
+        let mut tile_array = TileArray::new(
+            definitions.clone(),
+            TileLocal::new(3, Box::new([TileSurface::new(0, 0)])),
+            tile_amount as u32
+        );
         /*let mut tile_sectors = vec![];
 
         for tile_sector_type in &definitions.tile_sector_types {
@@ -47,13 +52,14 @@ impl Map {
 
         for tile_y in 0..30 {
             for tile_x in 0..30 {
-                let tile_index = tile_y as usize * 30 + tile_x as usize;
+                let tile_index = tile_y * 30 + tile_x;
+                let tile_link = tile_array.index(tile_index);
 
                 let east_dessert = (tile_y - 17).max(17 - tile_y)
                     + 10 - tile_x / 3;
 
                 if east_dessert < 7 {
-                    tiles[tile_index].surface = TileSurface::new(1, 0);
+                    tile_link.surface[0] = TileSurface::new(1, 0);
                 }
 
                 let from_center_distance = (tile_x - 15).max(15 - tile_x) + (tile_y - 15).max(15 - tile_y);
@@ -69,8 +75,8 @@ impl Map {
                 if from_mountain_distance < 6 {
                     let mut height = (6 - from_mountain_distance) * 10;
                     height *= height;
-                    tiles[tile_index].height += TerrainHeight::from_meters(height);
-                    tiles[tile_index].surface = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
+                    tile_link.main.height += TerrainHeight::from_meters(height as i32);
+                    tile_link.surface[0] = TileSurface::new(2, 2 - from_mountain_distance as usize / 2);
                 }
 
             }
@@ -78,7 +84,7 @@ impl Map {
 
         Self {
             properties,
-            tiles,
+            tiles: tile_array,
             //tile_sectors,
         }
     }
@@ -108,7 +114,7 @@ impl Map {
         }
     }
 
-    pub fn get_terrain(&self) -> (&MapSettings, &Vec<Tile>) {
+    pub fn get_terrain(&self) -> (&MapSettings, &TileArray) {
 
         (&self.properties, &self.tiles)
     }

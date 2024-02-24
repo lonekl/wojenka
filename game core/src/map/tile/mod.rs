@@ -24,7 +24,7 @@ pub struct TileArray {
 
 impl TileArray {
 
-    pub fn new(definitions: Arc<Definitions>, filler: Tile, tile_amount: u32) -> Self {
+    pub fn new(definitions: Arc<Definitions>, filler: TileLocal, tile_amount: u32) -> Self {
         let surface_byte_size = size_of::<TileSurface>() * definitions.surface_types.layers.len();
         let tile_byte_size = size_of::<TileSizedData>() + surface_byte_size;
         let mut byte_array = vec![0; tile_amount as usize * tile_byte_size].into_boxed_slice();
@@ -43,7 +43,7 @@ impl TileArray {
 
 
 
-    pub fn put(&mut self, index: u32, new_tile: Tile) -> Result<(), ()> {
+    pub fn put(&mut self, index: u32, new_tile: TileLocal) -> Result<(), ()> {
         if index >= self.tile_amount {
             return Err(())
         }
@@ -97,17 +97,55 @@ impl TileArray {
 
 }
 
+impl<'a> IntoIterator for &'a TileArray {
+    type Item = TileLink<'a>;
+    type IntoIter = TileArrayIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+
+        TileArrayIterator {
+            current_index: 0,
+            tiles: self,
+        }
+    }
+}
+
+
+
+pub struct TileArrayIterator<'a> {
+
+    current_index: u32,
+
+    tiles: &'a TileArray,
+
+}
+
+impl<'a> Iterator for TileArrayIterator<'a> {
+    type Item = TileLink<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_index == self.tiles.tile_amount {
+
+            return None
+        }
+        let result = self.tiles.index(self.current_index);
+        self.current_index += 1;
+
+        Some(result)
+    }
+}
+
 
 
 #[derive(Clone)]
-pub struct Tile {
+pub struct TileLocal {
 
     pub main: TileSizedData,
     pub surface: Box<[TileSurface]>,
 
 }
 
-impl Tile {
+impl TileLocal {
 
     pub fn new(owner: usize, surface: Box<[TileSurface]>) -> Self {
 
@@ -140,8 +178,8 @@ impl<'a> TileLink<'a> {
 #[derive(Clone)]
 pub struct TileSizedData {
 
-    height: TerrainHeight,
+    pub height: TerrainHeight,
 
-    owner: usize,
+    pub owner: usize,
 
 }
