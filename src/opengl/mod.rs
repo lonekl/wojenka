@@ -17,6 +17,7 @@ use crate::opengl::panels::Panel;
 use crate::util::{GlobalLogger, PoisonClearer, ResultLoggerExcept};
 
 
+
 pub struct OpenGlInterface {}
 
 impl OpenGlInterface {
@@ -52,6 +53,7 @@ impl OpenGlInterface {
                     GlutinEvent::WindowEvent { event: window_event, .. } => match window_event {
                         WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                         WindowEvent::KeyboardInput { input, is_synthetic, .. } => panel.keyboard_event(input, is_synthetic)?,
+                        WindowEvent::MouseWheel { delta, phase, .. } => panel.mouse_wheel_event(delta, phase)?,
                         _ => {},
                     },
                     GlutinEvent::RedrawEventsCleared => if time_from_last_frame >= runtime_settings.frame_length {

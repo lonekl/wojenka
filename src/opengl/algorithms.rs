@@ -1,5 +1,5 @@
 use std::time::Duration;
-use winit::event::{ElementState, KeyboardInput, VirtualKeyCode};
+use winit::event::{ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode};
 use crate::units::RotationXYZ;
 
 
@@ -58,9 +58,14 @@ pub struct Camera {
 
     pub rotation: RotationXYZ,
     pub position: [f32; 3],
+
     pub position_add_target: [f32; 3],
     pub movement_per_second: f32,
     pub movement_softness: f32,
+
+    pub min_height: f32,
+    pub max_height: f32,
+    pub height_move_step: f32,
 
 }
 
@@ -71,11 +76,17 @@ impl Camera {
         Self {
             rotation: RotationXYZ::ZERO,
             position: [0.0, 0.0, 0.0],
+
             position_add_target: [0.0, 0.0, 0.0],
             movement_per_second: 2.0,
             movement_softness: 17.5,
+
+            min_height: 2.0,
+            max_height: 75.0,
+            height_move_step: 0.175,
         }
     }
+
 
 
     pub fn tick(&mut self, frame_duration: Duration, key_controls: &KeyControls) {
@@ -98,6 +109,27 @@ impl Camera {
         self.position_add_target[0] -= motion_x;
         self.position_add_target[1] -= motion_y;
         self.position_add_target[2] -= motion_z;
+
+    }
+
+
+
+    pub fn mouse_scroll(&mut self, delta: MouseScrollDelta) {
+
+        self.position_add_target[2] -= match delta {
+            MouseScrollDelta::LineDelta( _x, y ) => y,
+            MouseScrollDelta::PixelDelta( axis ) => axis.y as f32,
+        } * self.height_move_step * self.position[2];
+
+        let target_z = self.position[2] + self.position_add_target[2];
+
+        if target_z < -self.max_height {
+            self.position_add_target[2] = -(self.position[2] + self.max_height);
+        }
+
+        if target_z > -self.min_height {
+            self.position_add_target[2] = -(self.position[2] + self.min_height);
+        }
 
     }
 

@@ -2,7 +2,7 @@ use std::time::Duration;
 use glium::{BackfaceCullingMode, Depth, DepthTest, Display, DrawParameters, Program, Surface, VertexBuffer};
 use glium::texture::{RawImage2d, SrgbTexture2d};
 use glium::uniforms::{MagnifySamplerFilter, Sampler};
-use winit::event::KeyboardInput;
+use winit::event::{KeyboardInput, MouseScrollDelta, TouchPhase};
 use war_economy_core::Game;
 use crate::opengl::algorithms::{Camera, KeyControls};
 use crate::opengl::object_conversion::map::map_tiles_to_vertexes;
@@ -57,6 +57,14 @@ impl Panel for GamePanel {
 
         Ok(())
     }
+
+    fn mouse_wheel_event(&mut self, delta: MouseScrollDelta, _phase: TouchPhase) -> Result<(), InterfaceError> {
+        self.camera.mouse_scroll(delta);
+
+        Ok(())
+    }
+
+
 
     fn redraw(&mut self, display: &Display, last_frame_duration: Duration) -> Result<(), InterfaceError> {
         self.camera.tick(last_frame_duration, &self.keyboard);

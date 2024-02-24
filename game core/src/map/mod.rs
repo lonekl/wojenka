@@ -26,7 +26,7 @@ impl Map {
         let tile_amount = properties.shape.tile_amount() as usize;
         let mut tile_array = TileArray::new(
             definitions.clone(),
-            TileLocal::new(3, Box::new([TileSurface::new(0, 0)])),
+            TileLocal::new(3, Box::new([TileSurface::new(0, 3)])),
             tile_amount as u32
         );
 
