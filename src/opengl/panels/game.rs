@@ -28,7 +28,7 @@ impl GamePanel {
 
     pub fn new(display: &Display) -> Result<Self, InterfaceError> {
         let game = Game::new();
-        let mut camera = Camera::new();
+        let mut camera = Camera::new(game.map.properties.shape.max_axis());
         camera.position = [0.0, -5.0, -12.5];
         camera.rotation.x = Angle::from_degrees(5.0);
 

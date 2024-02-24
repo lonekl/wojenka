@@ -1,6 +1,6 @@
 use std::time::Duration;
 use winit::event::{ElementState, KeyboardInput, MouseScrollDelta, VirtualKeyCode};
-use crate::units::RotationXYZ;
+use crate::units::{Angle, RotationXYZ};
 
 
 
@@ -62,16 +62,22 @@ pub struct Camera {
     pub position_add_target: [f32; 3],
     pub movement_per_second: f32,
     pub movement_softness: f32,
+    pub min_position: [f32; 3],
+    pub max_position: [f32; 3],
+    pub limit_z_dependency: f32,
 
-    pub min_height: f32,
-    pub max_height: f32,
     pub height_move_step: f32,
+
+    pub max_height_x_rotation: Angle,
+    pub min_height_x_rotation: Angle,
+    pub x_rotation_scale_power: i32,
 
 }
 
 impl Camera {
 
-    pub fn new() -> Self {
+    pub fn new(max_map_axis: (u32, u32)) -> Self {
+        let max_map_axis = (max_map_axis.0 as f32 / 2.0, max_map_axis.1 as f32 / 2.0);
 
         Self {
             rotation: RotationXYZ::ZERO,
@@ -80,10 +86,15 @@ impl Camera {
             position_add_target: [0.0, 0.0, 0.0],
             movement_per_second: 2.0,
             movement_softness: 17.5,
+            min_position: [-max_map_axis.0, -max_map_axis.1, -75.0],
+            max_position: [max_map_axis.0, max_map_axis.1, -2.0],
+            limit_z_dependency: 0.475,
 
-            min_height: 2.0,
-            max_height: 75.0,
             height_move_step: 0.175,
+
+            max_height_x_rotation: Angle::from_degrees(1.0),
+            min_height_x_rotation: Angle::from_degrees(65.0),
+            x_rotation_scale_power: 10,
         }
     }
 
@@ -98,6 +109,25 @@ impl Camera {
         let mut motion_rate = self.movement_softness * effect_rate;
         if motion_rate > 1.0 { motion_rate = 1.0; }
 
+        Self::motion_between_bounds(
+            self.position[0],
+            &mut self.position_add_target[0],
+            self.min_position[0] + self.position[2] * self.limit_z_dependency,
+            self.max_position[0] - self.position[2] * self.limit_z_dependency
+        );
+        Self::motion_between_bounds(
+            self.position[1],
+            &mut self.position_add_target[1],
+            self.min_position[1] + self.position[2] * self.limit_z_dependency,
+            self.max_position[1] - self.position[2] * self.limit_z_dependency
+        );
+        Self::motion_between_bounds(
+            self.position[2],
+            &mut self.position_add_target[2],
+            self.min_position[2],
+            self.max_position[2]
+        );
+
         let motion_x = self.position_add_target[0] * motion_rate;
         let motion_y = self.position_add_target[1] * motion_rate;
         let motion_z = self.position_add_target[2] * motion_rate;
@@ -110,6 +140,13 @@ impl Camera {
         self.position_add_target[1] -= motion_y;
         self.position_add_target[2] -= motion_z;
 
+
+
+        let x_rotation_full_scale = (self.max_position[2] - self.min_position[2]).powi(self.x_rotation_scale_power);
+        let x_rotation_current_scale = (self.position[2] - self.min_position[2]).powi(self.x_rotation_scale_power);
+        let x_rotation_level = x_rotation_current_scale / x_rotation_full_scale;
+        self.rotation.x = (self.min_height_x_rotation - self.max_height_x_rotation) * x_rotation_level + self.max_height_x_rotation;
+
     }
 
 
@@ -121,14 +158,19 @@ impl Camera {
             MouseScrollDelta::PixelDelta( axis ) => axis.y as f32,
         } * self.height_move_step * self.position[2];
 
-        let target_z = self.position[2] + self.position_add_target[2];
+    }
 
-        if target_z < -self.max_height {
-            self.position_add_target[2] = -(self.position[2] + self.max_height);
+
+
+    fn motion_between_bounds(position: f32, motion: &mut f32, min_position: f32, max_position: f32) {
+        let target = position + *motion;
+
+        if target > max_position {
+            *motion = max_position - position;
         }
 
-        if target_z > -self.min_height {
-            self.position_add_target[2] = -(self.position[2] + self.min_height);
+        if target < min_position {
+            *motion = min_position - position;
         }
 
     }
