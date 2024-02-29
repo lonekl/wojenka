@@ -114,7 +114,8 @@ impl SurfaceType {
             variant_image_path.push(&format!("{variant_index}.png"));
 
             let image_reader = File::open(variant_image_path).to_core_error()?;
-            let image = Image::load_png(image_reader).to_core_error()?;
+            let mut image = Image::load_png(image_reader).to_core_error()?;
+            image.invert_on_y();
 
             variants.push(image);
         }
