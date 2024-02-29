@@ -101,6 +101,37 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
 
 
 
+    pub fn invert_on_x(&mut self) {
+
+        for y in 0..self.dimensions.y {
+            let index_by_y = y * self.dimensions.x;
+            let row_copy = self.pixels[index_by_y..index_by_y + self.dimensions.x].to_vec();
+
+            for x in 0..self.dimensions.x {
+                self.pixels[index_by_y + x] = row_copy[self.dimensions.x - x - 1];
+            }
+
+        }
+
+    }
+
+    pub fn invert_on_y(&mut self) {
+        let image_copy = self.pixels.clone();
+
+        for y in 0..self.dimensions.y {
+            let index_by_y = y * self.dimensions.x;
+            let alt_index_by_y = (self.dimensions.y - y - 1) * self.dimensions.x;
+
+            for x in 0..self.dimensions.x {
+                self.pixels[index_by_y + x] = image_copy[alt_index_by_y + x];
+            }
+
+        }
+
+    }
+
+
+
     pub fn raw_u8_bytes(&self) -> Vec<u8>
         where [(); Color::BYTE_LENGTH]: Sized
     {
