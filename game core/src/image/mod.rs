@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::io::Read;
-use std::ops::{Add, Mul};
+use std::ops::{Add, Div, Mul, Sub};
 use png::{Decoder, DecodingError, OutputInfo};
 use crate::image::color::{ColorFn, Overdraw, Rgb8, Rgba8};
 
@@ -94,6 +94,22 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
             if shape.pixels[raw_filler_position] == shape_color {
                 filler.pixels[raw_filler_position].overdraw_on(&mut self.pixels[raw_self_position]);
             }
+        }
+
+        Ok(())
+    }
+
+    /// Horribly ineffective operation.
+    pub fn overdraw_image_rescaled<
+        Filler: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
+    >(&mut self, filler: &Image<Filler>, draw_offset: ImageDimensions, max_position: ImageDimensions) -> ImageResult<()> {
+
+        for filler_unscaled_position in max_position - draw_offset {
+            let self_position = filler_unscaled_position + draw_offset;
+            let filler_position = filler_unscaled_position * self.dimensions / filler.dimensions;
+
+            filler.pixels[filler_position.index_on_bigger_image(filler.dimensions.x)]
+                .overdraw_on(&mut self.pixels[self_position.index_on_bigger_image(self.dimensions.x)]);
         }
 
         Ok(())
@@ -196,7 +212,7 @@ pub struct ImageDimensions {
 
 impl ImageDimensions {
 
-    pub const ZERO: ImageDimensions = ImageDimensions { x: 0, y: 0 };
+    pub const ZERO: Self = Self { x: 0, y: 0 };
 
     pub fn from_png_info(info: OutputInfo) -> Self {
 
@@ -235,7 +251,7 @@ impl ImageDimensions {
 }
 
 impl IntoIterator for ImageDimensions {
-    type Item = ImageDimensions;
+    type Item = Self;
     type IntoIter = ImageDimensionIterator;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -248,9 +264,9 @@ impl IntoIterator for ImageDimensions {
 }
 
 impl Add<ImageDimensions> for ImageDimensions {
-    type Output = ImageDimensions;
+    type Output = Self;
 
-    fn add(self, rhs: ImageDimensions) -> Self::Output {
+    fn add(self, rhs: Self) -> Self::Output {
 
         Self {
             x: self.x + rhs.x,
@@ -259,14 +275,38 @@ impl Add<ImageDimensions> for ImageDimensions {
     }
 }
 
-impl Mul<ImageDimensions> for ImageDimensions {
-    type Output = ImageDimensions;
+impl Sub<ImageDimensions> for ImageDimensions {
+    type Output = Self;
 
-    fn mul(self, rhs: ImageDimensions) -> Self::Output {
+    fn sub(self, rhs: Self) -> Self::Output {
+
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl Mul<ImageDimensions> for ImageDimensions {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
 
         Self {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
+        }
+    }
+}
+
+impl Div<ImageDimensions> for ImageDimensions {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+
+        Self {
+            x: self.x / rhs.x,
+            y: self.y / rhs.y,
         }
     }
 }
