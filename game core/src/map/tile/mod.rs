@@ -25,7 +25,7 @@ impl TileArray {
     pub fn new(definitions: Arc<Definitions>, filler: TileLocal, tile_amount: u32) -> Self {
         let surface_byte_size = size_of::<TileSurface>() * definitions.surface_types.layers.len();
         let tile_byte_size = size_of::<TileSizedData>() + surface_byte_size;
-        let mut byte_array = vec![0; tile_amount as usize * tile_byte_size].into_boxed_slice();
+        let byte_array = vec![0; tile_amount as usize * tile_byte_size].into_boxed_slice();
         let mut result = Self {
             definitions,
             tile_amount,
@@ -35,6 +35,9 @@ impl TileArray {
             byte_array,
         };
 
+        for tile_index in 0..tile_amount {
+            let _ = result.put(tile_index, filler.clone());
+        }
 
         result
     }
