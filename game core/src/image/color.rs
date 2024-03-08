@@ -26,7 +26,7 @@ impl Rgb8 {
     pub const WHITE: Self = Self::new(255, 255, 255);
     pub const BLACK: Self = Self::new(0, 0, 0);
 
-    pub fn new(r: u8, g: u8, b: u8) -> Self {
+    pub const fn new(r: u8, g: u8, b: u8) -> Self {
 
         Self { r, g, b }
     }
@@ -81,7 +81,7 @@ impl Rgba8 {
     pub const WHITE: Self = Self::new(255, 255, 255, 255);
     pub const BLACK: Self = Self::new(0, 0, 0, 255);
 
-    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+    pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
 
         Self { r, g, b, a }
     }

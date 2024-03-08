@@ -103,6 +103,13 @@ impl<Color: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8>> Image
     pub fn overdraw_image_rescaled<
         Filler: ColorFn + PartialEq + Clone + Copy + From<Rgb8> + From<Rgba8> + Overdraw<Color>,
     >(&mut self, filler: &Image<Filler>, draw_offset: ImageDimensions, max_position: ImageDimensions) -> ImageResult<()> {
+        if draw_offset >= max_position {
+            return Err(ImageError::DimensionsDontMatch);
+        }
+
+        if self.dimensions < max_position {
+            return Err(ImageError::DimensionsDontMatch);
+        }
 
         for filler_unscaled_position in max_position - draw_offset {
             let self_position = filler_unscaled_position + draw_offset;
@@ -312,6 +319,10 @@ impl Div<ImageDimensions> for ImageDimensions {
 }
 
 /// Works in slightly other way, than you would expect.
+/// If there's a `a < b`, it will be true, if either of `a` axis is lower.
+/// Same with `a >= b` for example, if either of `a` axis is greater, or equal, it will be true.
+///
+/// That's the most use full way, it can work, I have.
 impl PartialOrd for ImageDimensions {
     fn partial_cmp(&self, _other: &Self) -> Option<Ordering> {
         None
