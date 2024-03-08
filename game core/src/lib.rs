@@ -42,9 +42,9 @@ impl Game {
             definitions: definitions.clone(),
             powers: vec![
                 Power::new("no state".to_string()),
-                Power::new("Poland".to_string()),
-                Power::new("Ukraine".to_string()),
-                Power::new("Hungary".to_string()),
+                Power::new("Second Polish Republic".to_string()),
+                Power::new("Arab Republic of Egypt".to_string()),
+                Power::new("Kingdom of Hungary".to_string()),
             ],
 
             world_time,

@@ -2,10 +2,11 @@ pub mod tile;
 pub mod units;
 
 use std::sync::Arc;
-use crate::map::units::{TerrainHeight};
+use crate::map::units::{Distance, TerrainHeight};
 use crate::units::Time;
-use crate::Definitions;
-use crate::image::ImageDimensions;
+use crate::{Definitions, Game};
+use crate::image::{Image, ImageDimensions};
+use crate::image::color::Rgb8;
 use crate::map::tile::{TileArray, TileLocal};
 use crate::map::tile::surface::TileSurface;
 
@@ -85,6 +86,28 @@ impl Map {
 
         }*/
 
+    }
+
+
+
+    pub fn flag_map_image(&self, game: &Game, tile_image_size: ImageDimensions) -> Image<Rgb8> {
+        let mut image = Image::new_uniform(Rgb8::BLACK, self.image_dimensions(tile_image_size));
+        let mut power_image_position_list = vec![
+            (self.properties.shape.max_axis_dimension(), ImageDimensions::new(0, 0));
+            game.powers.len()
+        ];
+
+        for (tile_index, tile) in self.tiles.into_iter().enumerate() {
+            let tile_position = ImageDimensions::from_u32_tuple(self.properties.shape.coordinates(tile_index));
+
+            power_image_position_list[tile.main.owner].0.x = power_image_position_list[tile.main.owner].0.x.min(tile_position.x);
+            power_image_position_list[tile.main.owner].0.y = power_image_position_list[tile.main.owner].0.y.min(tile_position.y);
+            power_image_position_list[tile.main.owner].1.x = power_image_position_list[tile.main.owner].1.x.max(tile_position.x);
+            power_image_position_list[tile.main.owner].1.y = power_image_position_list[tile.main.owner].1.y.max(tile_position.y);
+
+        }
+
+        image
     }
 
 
@@ -188,6 +211,11 @@ impl MapShape {
         match self {
             MapShape::Rectangular { width, height } => (*width, *height),
         }
+    }
+
+    pub fn max_axis_dimension(&self) -> ImageDimensions {
+
+        ImageDimensions::from_u32_tuple(self.max_axis())
     }
 
 }
