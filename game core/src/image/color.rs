@@ -136,11 +136,64 @@ impl Overdraw<Rgba8> for Rgba8 {
         rhs.g = ((self.g as i32  -  rhs.g as i32)  *  self.a as i32  /  0xff  +  rhs.g as i32) as u8;
         rhs.b = ((self.b as i32  -  rhs.b as i32)  *  self.a as i32  /  0xff  +  rhs.b as i32) as u8;
         rhs.a = self.a.checked_add(self.a).unwrap_or(u8::MAX);
+
     }
 }
 
 impl From<Rgb8> for Rgba8 {
     fn from(value: Rgb8) -> Self {
         Rgba8::new(value.r, value.g, value.b, u8::MAX)
+    }
+}
+
+
+
+pub struct Grey8 ( u8);
+
+impl Grey8 {
+
+    pub const WHITE: Self = Self::new(255);
+    pub const BLACK: Self = Self::new(0);
+
+    pub const fn new(grey: u8) -> Self {
+
+        Self ( grey )
+    }
+
+}
+
+impl ColorFn for Grey8 {
+    const BYTE_LENGTH: usize = 1;
+
+    fn to_raw_bytes(self) -> [u8; Self::BYTE_LENGTH] {
+
+        [self.0]
+    }
+}
+
+impl Overdraw<Rgb8> for Grey8 {
+    fn overdraw_on(&self, rhs: &mut Rgb8) {
+
+        rhs.r = self.0;
+        rhs.g = self.0;
+        rhs.b = self.0;
+
+    }
+}
+
+impl Overdraw<Rgba8> for Grey8 {
+    fn overdraw_on(&self, rhs: &mut Rgba8) {
+
+        rhs.r = self.0;
+        rhs.g = self.0;
+        rhs.b = self.0;
+        rhs.a = self.0;
+
+    }
+}
+
+impl Overdraw<Grey8> for Grey8 {
+    fn overdraw_on(&self, rhs: &mut Grey8) {
+        rhs.0 = self.0;
     }
 }
